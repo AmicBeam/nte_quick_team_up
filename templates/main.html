@@ -249,7 +249,7 @@
             <h2>选择主C</h2>
             <div class="grid" id="mainGrid">
                 {% for item in main_candidates %}
-                <div class="card" data-id="{{ item.id }}" data-group="main">
+                <div class="card" data-id="{{ item.id }}" data-elem="{{ item.elem }}" data-group="main">
                     <img src="{{ url_for('static', filename=item.image) }}" alt="{{ item.name }}" class="avatar">
                     <div class="name">{{ item.name }}</div>
                     {% if item.id in survive_ids %}
@@ -268,7 +268,7 @@
             <h2>选择三名队友</h2>
             <div class="grid" id="teamGrid">
                 {% for item in teammates %}
-                <div class="card" data-id="{{ item.id }}" data-group="team">
+                <div class="card" data-id="{{ item.id }}" data-elem="{{ item.elem }}" data-group="team">
                     <img src="{{ url_for('static', filename=item.image) }}" alt="{{ item.name }}" class="avatar">
                     <div class="name">{{ item.name }}</div>
                     <div class="badge">队友</div>
@@ -318,10 +318,13 @@
         const surviveWarning = document.getElementById("surviveWarning");
 
         const nameMap = {};
+        const elemMap = {};
         document.querySelectorAll(".card").forEach(card => {
             const id = card.dataset.id;
             const name = card.querySelector(".name")?.textContent || id;
             if (id && !nameMap[id]) nameMap[id] = name;
+            const elem = card.dataset.elem;
+            if (id && elem && !elemMap[id]) elemMap[id] = elem;
         });
 
         let selectedMain = null;
@@ -430,13 +433,14 @@
                 let dmg = basePersonalDamage(id, zhujueMode);
                 if (id === "jiuyuan" && creationCountTotal === 0) dmg = 0.6;
 
-                if (id === "baicang" && has("adele", allIds)) dmg *= 1.05;
+                const elem = elemMap[id];
+                if (has("adele", allIds) && elem === "咒") dmg *= 1.05;
 
-                const fuwenEligible = (id === "nanali" || id === "baicang" || id === "adele" || id === "zaowu" || id === "jiuyuan");
+                const fuwenEligible = (elem === "灵" || elem === "咒");
                 if (scenario.fuwenCount > 0 && fuwenEligible) dmg *= 1.20;
 
-                if (jinranActive && (id === "yi" || id === "hasuoer" || id === "haniya")) dmg *= 1.30;
-                if (mainId === "yi" && id === "hasuoer") dmg *= 1.10;
+                if (jinranActive && (elem === "魂" || elem === "相")) dmg *= 1.30;
+                if (mainId === "yi" && elem === "相") dmg *= 1.10;
                 if (yingxuActive && id === "hasuoer") dmg *= 2.00;
 
                 const ignoreAtk = (id === "xiaozhi" || id === "adele");
