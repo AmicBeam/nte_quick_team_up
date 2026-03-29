@@ -21,7 +21,7 @@ TEAMMATES = [
     {"id": "jiuyuan", "name": "九原", "image": "九原.png"},
     {"id": "zaowu", "name": "早雾", "image": "早雾.png"},
     {"id": "adele", "name": "阿德勒", "image": "阿德勒.png"},
-    {"id": "dafutier", "name": "达芙蒂尔", "image": "达芙蒂尔.png"},
+    {"id": "dafutier", "name": "达芙蒂尔（最好1觉）", "image": "达芙蒂尔.png"},
     {"id": "fatiya", "name": "法蒂娅", "image": "法帝娅.png"},
     {"id": "haniya", "name": "哈尼娅", "image": "哈尼娅.png"},
     {"id": "hasuoer", "name": "哈索尔", "image": "哈索尔.png"},
