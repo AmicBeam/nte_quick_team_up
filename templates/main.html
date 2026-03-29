@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>队伍主C选择</title>
+    <title>异环预配队</title>
     <style>
         :root {
             color-scheme: light;
@@ -51,6 +51,14 @@
             margin-top: 6px;
             color: rgba(247, 248, 255, 0.55);
             font-size: 12px;
+        }
+        .hero-note a {
+            color: #f6c05b;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .hero-note a:hover {
+            color: #ffd88a;
         }
         .glass {
             background: var(--card);
@@ -116,6 +124,23 @@
             font-size: 12px;
             color: var(--text);
             background: rgba(0, 0, 0, 0.35);
+        }
+        .survive-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 26px;
+            height: 26px;
+            border-radius: 999px;
+            display: grid;
+            place-items: center;
+            background: rgba(90, 200, 120, 0.45);
+            border: 1px solid rgba(90, 200, 120, 0.7);
+        }
+        .survive-badge svg {
+            width: 16px;
+            height: 16px;
+            fill: rgba(255, 255, 255, 0.9);
         }
         .summary {
             display: flex;
@@ -184,6 +209,11 @@
             color: rgba(247, 248, 255, 0.6);
             line-height: 1.5;
         }
+        .warning {
+            margin-top: 6px;
+            font-size: 12px;
+            color: #ff8b8b;
+        }
         .hint {
             margin-top: 10px;
             color: var(--muted);
@@ -207,12 +237,13 @@
             <div>
                 <h1>队伍主C选择</h1>
                 <p>挑选你的主C与三名队友，生成专属的队伍评分。</p>
-                <div class="hero-note">角色为80级，天赋10级；敌人为82级无红圈会攻击的站桩BOSS。</div>
+                <div class="hero-note">角色为80级，天赋10级；敌人为82级、20全抗、无红圈会攻击的站桩BOSS。</div>
                 <div class="hero-note">S级默认0觉，A级默认满觉，小吱2觉。</div>
                 <div class="hero-note">关注B站 <a href="https://space.bilibili.com/9412490" target="_blank" rel="noreferrer">静默之光</a>；仅供娱乐，请以实战为主。</div>
             </div>
         </div>
 
+        {% set survive_ids = ["baicang", "jiuyuan", "aidejia", "adele", "fatiya"] %}
         <div class="glass section">
             <h2>选择主C</h2>
             <div class="grid" id="mainGrid">
@@ -220,6 +251,13 @@
                 <div class="card" data-id="{{ item.id }}" data-group="main">
                     <img src="{{ url_for('static', filename=item.image) }}" alt="{{ item.name }}" class="avatar">
                     <div class="name">{{ item.name }}</div>
+                    {% if item.id in survive_ids %}
+                    <div class="survive-badge" title="具备生存能力" aria-label="具备生存能力">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M12 2l8 4v6c0 5.25-3.44 9.94-8 10.99C7.44 21.94 4 17.25 4 12V6l8-4zm0 2.27L6 7v5c0 4.27 2.73 8.18 6 8.99 3.27-.81 6-4.72 6-8.99V7l-6-2.73z"/>
+                        </svg>
+                    </div>
+                    {% endif %}
                 </div>
                 {% endfor %}
             </div>
@@ -233,6 +271,13 @@
                     <img src="{{ url_for('static', filename=item.image) }}" alt="{{ item.name }}" class="avatar">
                     <div class="name">{{ item.name }}</div>
                     <div class="badge">队友</div>
+                    {% if item.id in survive_ids %}
+                    <div class="survive-badge" title="具备生存能力" aria-label="具备生存能力">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M12 2l8 4v6c0 5.25-3.44 9.94-8 10.99C7.44 21.94 4 17.25 4 12V6l8-4zm0 2.27L6 7v5c0 4.27 2.73 8.18 6 8.99 3.27-.81 6-4.72 6-8.99V7l-6-2.73z"/>
+                        </svg>
+                    </div>
+                    {% endif %}
                 </div>
                 {% endfor %}
             </div>
@@ -255,6 +300,7 @@
                     <img src="{{ url_for('static', filename='单位.jpg') }}" alt="单位" class="unit-icon">
                 </div>
                 <div class="breakdown" id="breakdown"></div>
+                <div class="warning" id="surviveWarning"></div>
             </div>
         </div>
     </div>
@@ -268,6 +314,7 @@
         const calcBtn = document.getElementById("calcBtn");
         const resultValue = document.getElementById("resultValue");
         const breakdown = document.getElementById("breakdown");
+        const surviveWarning = document.getElementById("surviveWarning");
 
         const nameMap = {};
         document.querySelectorAll(".card").forEach(card => {
@@ -365,6 +412,7 @@
             const unique = new Set(allIds);
             if (unique.size !== 4) return null;
 
+            const creationCountTotal = scenario.creationCountBase + scenario.creationCountNoMasteryDouble;
             const zhujueMode = computeZhujueMode(allIds, mainId);
             const layers = computeLayers(allIds);
             const atkBonus = computeAtkBonus(allIds, scenario.anxingCount, mainId);
@@ -377,6 +425,7 @@
             const characterDamage = {};
             for (const id of allIds) {
                 let dmg = basePersonalDamage(id, zhujueMode);
+                if (id === "jiuyuan" && creationCountTotal === 0) dmg = 0.6;
 
                 if (id === "baicang" && has("adele", allIds)) dmg *= 1.05;
 
@@ -503,6 +552,10 @@
             if (result.anxingDamage > 0) parts.push(`黯星 ${result.anxingDamage.toFixed(1)}`);
             parts.push(`倾陷 ${result.qingxianDamage.toFixed(1)}`);
             breakdown.textContent = parts.join(" · ");
+
+            const surviveIds = new Set(["baicang", "jiuyuan", "aidejia", "adele", "fatiya"]);
+            const hasSurvive = orderedIds.some(id => surviveIds.has(id));
+            surviveWarning.textContent = hasSurvive ? "" : "请注意：该配队缺少生存能力";
         }
 
         mainGrid.addEventListener("click", event => {

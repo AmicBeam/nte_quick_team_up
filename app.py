@@ -1,8 +1,11 @@
 # SPDX-License-Identifier: GPL-3.0-only
 # Copyright (C) 2025 AmicBeam
 from flask import Flask, render_template
+import random
 
 app = Flask(__name__)
+app.config["TEMPLATES_AUTO_RELOAD"] = True
+app.jinja_env.auto_reload = True
 
 MAIN_CANDIDATES = [
     {"id": "bohe", "name": "薄荷", "image": "薄荷.png"},
@@ -26,7 +29,13 @@ TEAMMATES = [
 
 @app.route("/")
 def home():
-    return render_template("main.html", main_candidates=MAIN_CANDIDATES, teammates=TEAMMATES)
+    teammates = []
+    for item in TEAMMATES:
+        if item["id"] == "zhujue":
+            teammates.append({**item, "image": random.choice(["男主.png", "女主.png"])})
+        else:
+            teammates.append(item)
+    return render_template("main.html", main_candidates=MAIN_CANDIDATES, teammates=teammates)
 
 # 启动Flask应用
 if __name__ == '__main__':
