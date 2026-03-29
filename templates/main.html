@@ -47,6 +47,11 @@
             margin: 12px 0 0;
             color: var(--muted);
         }
+        .hero-note {
+            margin-top: 6px;
+            color: rgba(247, 248, 255, 0.55);
+            font-size: 12px;
+        }
         .glass {
             background: var(--card);
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -156,6 +161,7 @@
             flex-direction: column;
             align-items: flex-start;
             gap: 8px;
+            margin-top: 16px;
         }
         .result-row {
             display: flex;
@@ -201,15 +207,9 @@
             <div>
                 <h1>队伍主C选择</h1>
                 <p>挑选你的主C与三名队友，生成专属的队伍评分。</p>
-            </div>
-            <div class="result glass">
-                <div class="result-row">
-                    <span>当前评分</span>
-                    <span class="value" id="resultValue">—</span>
-                    <span>*</span>
-                    <img src="/unit.png" alt="单位" class="unit-icon">
-                </div>
-                <div class="breakdown" id="breakdown"></div>
+                <div class="hero-note">角色为80级，天赋10级；敌人为82级无红圈会攻击的站桩BOSS。</div>
+                <div class="hero-note">S级默认0觉，A级默认满觉，小吱2觉。</div>
+                <div class="hero-note">关注B站 <a href="https://space.bilibili.com/9412490" target="_blank" rel="noreferrer">静默之光</a>；仅供娱乐，请以实战为主。</div>
             </div>
         </div>
 
@@ -218,7 +218,7 @@
             <div class="grid" id="mainGrid">
                 {% for item in main_candidates %}
                 <div class="card" data-id="{{ item.id }}" data-group="main">
-                    <img src="/avatars/{{ item.id }}.png" alt="{{ item.name }}" class="avatar">
+                    <img src="{{ url_for('static', filename=item.image) }}" alt="{{ item.name }}" class="avatar">
                     <div class="name">{{ item.name }}</div>
                 </div>
                 {% endfor %}
@@ -230,7 +230,7 @@
             <div class="grid" id="teamGrid">
                 {% for item in teammates %}
                 <div class="card" data-id="{{ item.id }}" data-group="team">
-                    <img src="/avatars/{{ item.id }}.png" alt="{{ item.name }}" class="avatar">
+                    <img src="{{ url_for('static', filename=item.image) }}" alt="{{ item.name }}" class="avatar">
                     <div class="name">{{ item.name }}</div>
                     <div class="badge">队友</div>
                 </div>
@@ -247,6 +247,15 @@
                 <button class="btn" id="calcBtn" disabled>开始计算</button>
                 <span class="hint">完成选择后自动解锁按钮</span>
             </div>
+            <div class="result">
+                <div class="result-row">
+                    <span>最终评分</span>
+                    <span class="value" id="resultValue">—</span>
+                    <span>*</span>
+                    <img src="{{ url_for('static', filename='单位.jpg') }}" alt="单位" class="unit-icon">
+                </div>
+                <div class="breakdown" id="breakdown"></div>
+            </div>
         </div>
     </div>
 
@@ -259,6 +268,13 @@
         const calcBtn = document.getElementById("calcBtn");
         const resultValue = document.getElementById("resultValue");
         const breakdown = document.getElementById("breakdown");
+
+        const nameMap = {};
+        document.querySelectorAll(".card").forEach(card => {
+            const id = card.dataset.id;
+            const name = card.querySelector(".name")?.textContent || id;
+            if (id && !nameMap[id]) nameMap[id] = name;
+        });
 
         let selectedMain = null;
         const selectedTeam = new Set();
@@ -323,7 +339,7 @@
             if (id === "zaowu") return 0.2;
             if (id === "fatiya") return 0.2;
             if (id === "aidejia") return 0.0;
-            if (id === "haniya") return 0.0;
+            if (id === "haniya") return 0.1;
             if (id === "zhujue") return zhujueMode === "mastery" ? 0.3 : 0.5;
             return 0.0;
         }
@@ -336,10 +352,10 @@
             return layers;
         }
 
-        function computeAtkBonus(allIds, anxingCount) {
+        function computeAtkBonus(allIds, anxingCount, mainId) {
             let atk = 0;
-            if (has("zaowu", allIds)) atk += 0.10;
-            if (has("haniya", allIds)) atk += 0.25;
+            if (has("zaowu", allIds)) atk += (mainId === "xiaozhi" ? 0.05 : 0.10);
+            if (has("haniya", allIds)) atk += (mainId === "xiaozhi" ? 0.20 : 0.25);
             if (anxingCount > 0 && has("haniya", allIds)) atk += 0.08;
             return atk;
         }
@@ -351,13 +367,14 @@
 
             const zhujueMode = computeZhujueMode(allIds, mainId);
             const layers = computeLayers(allIds);
-            const atkBonus = computeAtkBonus(allIds, scenario.anxingCount);
+            const atkBonus = computeAtkBonus(allIds, scenario.anxingCount, mainId);
             const zhuoranLayerBoost = 1 + layers * 0.25;
 
             let qingxianDamage = 0.4;
             if (has("dafutier", allIds)) qingxianDamage *= 1.5;
 
             let personalSum = 0;
+            const characterDamage = {};
             for (const id of allIds) {
                 let dmg = basePersonalDamage(id, zhujueMode);
 
@@ -371,10 +388,11 @@
 
                 if (id === "adele") dmg *= zhuoranLayerBoost;
 
-                if (mainId === "xiaozhi" && (id === "zhujue" || id === "hasuoer" || id === "adele" || id === "zaowu")) {
+                if (mainId === "xiaozhi" && (id === "zhujue" || id === "hasuoer" || id === "adele" || id === "zaowu" || id === "haniya")) {
                     dmg *= 0.5;
                 }
 
+                characterDamage[id] = dmg;
                 personalSum += dmg;
             }
 
@@ -402,6 +420,7 @@
             return {
                 total,
                 personalSum,
+                characterDamage,
                 creationFinal,
                 zhuoranDamage,
                 anxingDamage,
@@ -473,7 +492,12 @@
             }
             resultValue.textContent = result.total.toFixed(1);
             const parts = [];
-            parts.push(`个人伤害 ${result.personalSum.toFixed(1)}`);
+            const orderedIds = [selectedMain.id, ...teamArray];
+            orderedIds.forEach(id => {
+                const name = nameMap[id] || id;
+                const value = result.characterDamage?.[id] ?? 0;
+                parts.push(`${name} ${value.toFixed(1)}`);
+            });
             if (result.creationFinal > 0) parts.push(`创生 ${result.creationFinal.toFixed(1)}`);
             if (result.zhuoranDamage > 0) parts.push(`浊燃 ${result.zhuoranDamage.toFixed(1)}`);
             if (result.anxingDamage > 0) parts.push(`黯星 ${result.anxingDamage.toFixed(1)}`);
