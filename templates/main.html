@@ -153,12 +153,18 @@
         }
         .result {
             display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        .result-row {
+            display: flex;
             align-items: center;
             gap: 10px;
             font-size: 20px;
             font-weight: 700;
         }
-        .result .value {
+        .result-row .value {
             color: var(--accent-2);
             font-size: 24px;
         }
@@ -166,6 +172,11 @@
             width: 40px;
             height: auto;
             filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35));
+        }
+        .breakdown {
+            font-size: 12px;
+            color: rgba(247, 248, 255, 0.6);
+            line-height: 1.5;
         }
         .hint {
             margin-top: 10px;
@@ -192,10 +203,13 @@
                 <p>挑选你的主C与三名队友，生成专属的队伍评分。</p>
             </div>
             <div class="result glass">
-                <span>当前评分</span>
-                <span class="value" id="resultValue">—</span>
-                <span>*</span>
-                <img src="/unit.png" alt="单位" class="unit-icon">
+                <div class="result-row">
+                    <span>当前评分</span>
+                    <span class="value" id="resultValue">—</span>
+                    <span>*</span>
+                    <img src="/unit.png" alt="单位" class="unit-icon">
+                </div>
+                <div class="breakdown" id="breakdown"></div>
             </div>
         </div>
 
@@ -244,6 +258,7 @@
         const hintText = document.getElementById("hintText");
         const calcBtn = document.getElementById("calcBtn");
         const resultValue = document.getElementById("resultValue");
+        const breakdown = document.getElementById("breakdown");
 
         let selectedMain = null;
         const selectedTeam = new Set();
@@ -383,7 +398,15 @@
                 anxingDamage *= 1.03;
             }
 
-            return personalSum + creationFinal + zhuoranDamage + anxingDamage + qingxianDamage;
+            const total = personalSum + creationFinal + zhuoranDamage + anxingDamage + qingxianDamage;
+            return {
+                total,
+                personalSum,
+                creationFinal,
+                zhuoranDamage,
+                anxingDamage,
+                qingxianDamage
+            };
         }
 
         function computeBestTotal(mainId, teamIds) {
@@ -416,7 +439,9 @@
                 if (canAny(["adele", "zaowu"])) sB.fuwenCount = 1;
                 const tB = computeScenarioTotal(mainId, teamIds, sB);
 
-                return Math.max(tA ?? -Infinity, tB ?? -Infinity);
+                if (!tA) return tB;
+                if (!tB) return tA;
+                return tA.total >= tB.total ? tA : tB;
             }
 
             if (mainId === "baicang") {
@@ -428,7 +453,9 @@
                 if (canAny(["nanali", "jiuyuan", "bohe"])) sB.fuwenCount = 1;
                 const tB = computeScenarioTotal(mainId, teamIds, sB);
 
-                return Math.max(tA ?? -Infinity, tB ?? -Infinity);
+                if (!tA) return tB;
+                if (!tB) return tA;
+                return tA.total >= tB.total ? tA : tB;
             }
 
             return computeScenarioTotal(mainId, teamIds, baseScenario);
@@ -439,12 +466,19 @@
                 return;
             }
             const teamArray = Array.from(selectedTeam);
-            const score = computeBestTotal(selectedMain.id, teamArray);
-            if (score === null) {
+            const result = computeBestTotal(selectedMain.id, teamArray);
+            if (result === null) {
                 hintText.textContent = "选择无效：队伍中存在重复角色";
                 return;
             }
-            resultValue.textContent = score.toFixed(1);
+            resultValue.textContent = result.total.toFixed(1);
+            const parts = [];
+            parts.push(`个人伤害 ${result.personalSum.toFixed(1)}`);
+            if (result.creationFinal > 0) parts.push(`创生 ${result.creationFinal.toFixed(1)}`);
+            if (result.zhuoranDamage > 0) parts.push(`浊燃 ${result.zhuoranDamage.toFixed(1)}`);
+            if (result.anxingDamage > 0) parts.push(`黯星 ${result.anxingDamage.toFixed(1)}`);
+            parts.push(`倾陷 ${result.qingxianDamage.toFixed(1)}`);
+            breakdown.textContent = parts.join(" · ");
         }
 
         mainGrid.addEventListener("click", event => {
