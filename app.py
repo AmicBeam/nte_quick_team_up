@@ -21,7 +21,7 @@ TEAMMATES = [
     {"id": "jiuyuan", "name": "九原", "image": "九原.png", "elem": "灵"},
     {"id": "zaowu", "name": "早雾", "image": "早雾.png", "elem": "咒"},
     {"id": "adele", "name": "阿德勒", "image": "阿德勒.png", "elem": "咒"},
-    {"id": "dafutier", "name": "达芙蒂尔（最好1觉）", "image": "达芙蒂尔.png", "elem": "暗"},
+    {"id": "dafutier", "name": "达芙蒂尔（1觉或弹刀）", "image": "达芙蒂尔.png", "elem": "暗"},
     {"id": "fatiya", "name": "法蒂娅", "image": "法帝娅.png", "elem": "魂"},
     {"id": "haniya", "name": "哈尼娅", "image": "哈尼娅.png", "elem": "魂"},
     {"id": "hasuoer", "name": "哈索尔", "image": "哈索尔.png", "elem": "相"},
