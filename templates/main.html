@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>队伍主C选择</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #0f1224;
+            --card: rgba(255, 255, 255, 0.06);
+            --card-strong: rgba(255, 255, 255, 0.12);
+            --text: #f7f8ff;
+            --muted: rgba(247, 248, 255, 0.65);
+            --accent: #8ad1ff;
+            --accent-2: #f6c05b;
+            --danger: #ff8b8b;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, -apple-system, sans-serif;
+            background: radial-gradient(circle at 20% 20%, #2a2f5b, #0f1224 55%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        .page {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+        }
+        .hero {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        .hero h1 {
+            margin: 0;
+            font-size: 32px;
+            letter-spacing: 1px;
+        }
+        .hero p {
+            margin: 12px 0 0;
+            color: var(--muted);
+        }
+        .glass {
+            background: var(--card);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 24px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 10px 40px rgba(15, 18, 36, 0.45);
+        }
+        .section {
+            margin-top: 28px;
+        }
+        .section h2 {
+            margin: 0 0 16px;
+            font-size: 20px;
+            color: var(--accent);
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+        }
+        .card {
+            position: relative;
+            padding: 16px;
+            border-radius: 18px;
+            background: var(--card);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.2s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            background: var(--card-strong);
+        }
+        .card.selected {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(138, 209, 255, 0.35);
+        }
+        .avatar {
+            width: 86px;
+            height: 86px;
+            border-radius: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+            object-fit: cover;
+        }
+        .name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--accent);
+        }
+        .badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            font-size: 12px;
+            color: var(--text);
+            background: rgba(0, 0, 0, 0.35);
+        }
+        .summary {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 20px;
+            padding: 16px 20px;
+            background: rgba(15, 18, 36, 0.55);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .summary span {
+            color: var(--muted);
+        }
+        .cta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-top: 24px;
+        }
+        .btn {
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent), #6ea8ff);
+            color: #0b0f24;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.2s ease;
+            box-shadow: 0 10px 20px rgba(78, 135, 255, 0.35);
+        }
+        .btn:disabled {
+            background: #3d456b;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .result {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .result .value {
+            color: var(--accent-2);
+            font-size: 24px;
+        }
+        .unit-icon {
+            width: 40px;
+            height: auto;
+            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35));
+        }
+        .hint {
+            margin-top: 10px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+        @media (max-width: 760px) {
+            .hero {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .cta {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="hero">
+            <div>
+                <h1>队伍主C选择</h1>
+                <p>挑选你的主C与三名队友，生成专属的队伍评分。</p>
+            </div>
+            <div class="result glass">
+                <span>当前评分</span>
+                <span class="value" id="resultValue">—</span>
+                <span>*</span>
+                <img src="/unit.png" alt="单位" class="unit-icon">
+            </div>
+        </div>
+
+        <div class="glass section">
+            <h2>选择主C</h2>
+            <div class="grid" id="mainGrid">
+                {% for item in main_candidates %}
+                <div class="card" data-id="{{ item.id }}" data-group="main">
+                    <img src="/avatars/{{ item.id }}.png" alt="{{ item.name }}" class="avatar">
+                    <div class="name">{{ item.name }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="glass section">
+            <h2>选择三名队友</h2>
+            <div class="grid" id="teamGrid">
+                {% for item in teammates %}
+                <div class="card" data-id="{{ item.id }}" data-group="team">
+                    <img src="/avatars/{{ item.id }}.png" alt="{{ item.name }}" class="avatar">
+                    <div class="name">{{ item.name }}</div>
+                    <div class="badge">队友</div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="summary">
+                <div>
+                    <div>主C：<span id="mainPicked">未选择</span></div>
+                    <div>队友：<span id="teamPicked">0 / 3</span></div>
+                </div>
+                <div class="hint" id="hintText">请选择 1 名主C 与 3 名队友</div>
+            </div>
+            <div class="cta">
+                <button class="btn" id="calcBtn" disabled>开始计算</button>
+                <span class="hint">完成选择后自动解锁按钮</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const mainGrid = document.getElementById("mainGrid");
+        const teamGrid = document.getElementById("teamGrid");
+        const mainPicked = document.getElementById("mainPicked");
+        const teamPicked = document.getElementById("teamPicked");
+        const hintText = document.getElementById("hintText");
+        const calcBtn = document.getElementById("calcBtn");
+        const resultValue = document.getElementById("resultValue");
+
+        let selectedMain = null;
+        const selectedTeam = new Set();
+
+        function updateSummary() {
+            mainPicked.textContent = selectedMain ? selectedMain.name : "未选择";
+            teamPicked.textContent = `${selectedTeam.size} / 3`;
+            const ready = selectedMain && selectedTeam.size === 3;
+            calcBtn.disabled = !ready;
+            hintText.textContent = ready ? "可以开始计算" : "请选择 1 名主C 与 3 名队友";
+        }
+
+        function selectMain(card) {
+            const cards = mainGrid.querySelectorAll(".card");
+            cards.forEach(item => item.classList.remove("selected"));
+            card.classList.add("selected");
+            selectedMain = {
+                id: card.dataset.id,
+                name: card.querySelector(".name").textContent
+            };
+            updateSummary();
+        }
+
+        function toggleTeammate(card) {
+            const id = card.dataset.id;
+            if (selectedTeam.has(id)) {
+                selectedTeam.delete(id);
+                card.classList.remove("selected");
+            } else {
+                if (selectedTeam.size >= 3) {
+                    hintText.textContent = "队友已满 3 人";
+                    return;
+                }
+                selectedTeam.add(id);
+                card.classList.add("selected");
+            }
+            updateSummary();
+        }
+
+        function has(id, allIds) {
+            return allIds.includes(id);
+        }
+
+        function computeZhujueMode(allIds, mainId) {
+            if (!has("zhujue", allIds)) return "none";
+            const nanaliOrJiuyuan = has("nanali", allIds) || has("jiuyuan", allIds);
+            if (nanaliOrJiuyuan) return "mastery";
+            if (mainId === "xiaozhi" && has("bohe", allIds)) return "mastery";
+            return "direct";
+        }
+
+        function basePersonalDamage(id, zhujueMode) {
+            if (id === "bohe") return 1.0;
+            if (id === "yi") return 1.0;
+            if (id === "baicang") return 1.6;
+            if (id === "nanali") return 1.3;
+            if (id === "xiaozhi") return 3.0;
+            if (id === "jiuyuan") return 0.8;
+            if (id === "dafutier") return 0.7;
+            if (id === "hasuoer") return 0.4;
+            if (id === "adele") return 0.2;
+            if (id === "zaowu") return 0.2;
+            if (id === "fatiya") return 0.2;
+            if (id === "aidejia") return 0.0;
+            if (id === "haniya") return 0.0;
+            if (id === "zhujue") return zhujueMode === "mastery" ? 0.3 : 0.5;
+            return 0.0;
+        }
+
+        function computeLayers(allIds) {
+            if (!has("zaowu", allIds)) return 0;
+            let layers = 1;
+            if (has("adele", allIds)) layers += 1;
+            if (has("baicang", allIds)) layers += 0.5;
+            return layers;
+        }
+
+        function computeAtkBonus(allIds, anxingCount) {
+            let atk = 0;
+            if (has("zaowu", allIds)) atk += 0.10;
+            if (has("haniya", allIds)) atk += 0.25;
+            if (anxingCount > 0 && has("haniya", allIds)) atk += 0.08;
+            return atk;
+        }
+
+        function computeScenarioTotal(mainId, teamIds, scenario) {
+            const allIds = [mainId, ...teamIds];
+            const unique = new Set(allIds);
+            if (unique.size !== 4) return null;
+
+            const zhujueMode = computeZhujueMode(allIds, mainId);
+            const layers = computeLayers(allIds);
+            const atkBonus = computeAtkBonus(allIds, scenario.anxingCount);
+            const zhuoranLayerBoost = 1 + layers * 0.25;
+
+            let qingxianDamage = 0.4;
+            if (has("dafutier", allIds)) qingxianDamage *= 1.5;
+
+            let personalSum = 0;
+            for (const id of allIds) {
+                let dmg = basePersonalDamage(id, zhujueMode);
+
+                if (id === "baicang" && has("adele", allIds)) dmg *= 1.05;
+
+                const fuwenEligible = (id === "nanali" || id === "baicang" || id === "adele" || id === "zaowu");
+                if (scenario.fuwenCount > 0 && fuwenEligible) dmg *= 1.20;
+
+                const ignoreAtk = (id === "xiaozhi" || id === "adele");
+                if (!ignoreAtk) dmg *= (1 + atkBonus);
+
+                if (id === "adele") dmg *= zhuoranLayerBoost;
+
+                if (mainId === "xiaozhi" && (id === "zhujue" || id === "hasuoer" || id === "adele" || id === "zaowu")) {
+                    dmg *= 0.5;
+                }
+
+                personalSum += dmg;
+            }
+
+            const creationMultNanali = has("nanali", allIds) ? 2 : 1;
+            const creationMultJiuyuan = has("jiuyuan", allIds) ? 2 : 1;
+            const creationMult = creationMultNanali * creationMultJiuyuan;
+
+            const masteryMult = (zhujueMode === "mastery") ? 2 : 1;
+
+            const creationBasePart = scenario.creationCountBase * 0.15 * masteryMult;
+            const creationExtraPart = scenario.creationCountNoMasteryDouble * 0.15;
+            const creationDamage = (creationBasePart + creationExtraPart) * creationMult;
+
+            let zhuoranDamage = scenario.zhuoranCount * 0.2;
+            let anxingDamage = scenario.anxingCount * 0.3;
+            let creationFinal = creationDamage;
+
+            if (has("adele", allIds) && scenario.zhuoranCount > 0) {
+                creationFinal *= 1.03;
+                zhuoranDamage *= 1.03;
+                anxingDamage *= 1.03;
+            }
+
+            return personalSum + creationFinal + zhuoranDamage + anxingDamage + qingxianDamage;
+        }
+
+        function computeBestTotal(mainId, teamIds) {
+            const allIds = [mainId, ...teamIds];
+            const unique = new Set(allIds);
+            if (unique.size !== 4) return null;
+
+            const baseScenario = {
+                creationCountBase: has("zhujue", allIds) ? 1 : 0,
+                creationCountNoMasteryDouble: 0,
+                zhuoranCount: 0,
+                anxingCount: 0,
+                fuwenCount: 0
+            };
+
+            const canAny = (ids) => ids.some(id => has(id, allIds));
+
+            if (mainId === "xiaozhi") {
+                const extra = canAny(["nanali", "jiuyuan", "bohe"]) ? 1 : 0;
+                const s = { ...baseScenario, creationCountNoMasteryDouble: extra };
+                return computeScenarioTotal(mainId, teamIds, s);
+            }
+
+            if (mainId === "nanali" || mainId === "bohe") {
+                const sA = { ...baseScenario };
+                if (canAny(["xiaozhi", "zhujue", "aidejia"])) sA.creationCountBase += 1;
+                const tA = computeScenarioTotal(mainId, teamIds, sA);
+
+                const sB = { ...baseScenario };
+                if (canAny(["adele", "zaowu"])) sB.fuwenCount = 1;
+                const tB = computeScenarioTotal(mainId, teamIds, sB);
+
+                return Math.max(tA ?? -Infinity, tB ?? -Infinity);
+            }
+
+            if (mainId === "baicang") {
+                const sA = { ...baseScenario };
+                if (has("dafutier", allIds)) sA.zhuoranCount = 1;
+                const tA = computeScenarioTotal(mainId, teamIds, sA);
+
+                const sB = { ...baseScenario };
+                if (canAny(["nanali", "jiuyuan", "bohe"])) sB.fuwenCount = 1;
+                const tB = computeScenarioTotal(mainId, teamIds, sB);
+
+                return Math.max(tA ?? -Infinity, tB ?? -Infinity);
+            }
+
+            return computeScenarioTotal(mainId, teamIds, baseScenario);
+        }
+
+        function calculateScore() {
+            if (!selectedMain || selectedTeam.size !== 3) {
+                return;
+            }
+            const teamArray = Array.from(selectedTeam);
+            const score = computeBestTotal(selectedMain.id, teamArray);
+            if (score === null) {
+                hintText.textContent = "选择无效：队伍中存在重复角色";
+                return;
+            }
+            resultValue.textContent = score.toFixed(1);
+        }
+
+        mainGrid.addEventListener("click", event => {
+            const card = event.target.closest(".card");
+            if (!card) return;
+            selectMain(card);
+        });
+
+        teamGrid.addEventListener("click", event => {
+            const card = event.target.closest(".card");
+            if (!card) return;
+            toggleTeammate(card);
+        });
+
+        calcBtn.addEventListener("click", calculateScore);
+    </script>
+</body>
+</html>
