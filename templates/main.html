@@ -477,7 +477,8 @@
                 anxingDamage *= adlerBoost;
             }
 
-            const total = personalSum + creationFinal + zhuoranDamage + anxingDamage + qingxianDamage;
+            let total = personalSum + creationFinal + zhuoranDamage + anxingDamage + qingxianDamage;
+            if (mainId === "baicang") total *= 1.05;
             return {
                 total,
                 personalSum,
