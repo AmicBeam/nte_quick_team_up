@@ -417,6 +417,8 @@
             const layers = computeLayers(allIds);
             const atkBonus = computeAtkBonus(allIds, scenario.anxingCount, mainId);
             const zhuoranLayerBoost = 1 + layers * 0.25;
+            const jinranActive = (mainId === "yi") && (has("fatiya", allIds) || has("haniya", allIds));
+            const yingxuActive = (mainId === "yi") && has("zhujue", allIds) && has("jiuyuan", allIds);
 
             let qingxianDamage = 0.4;
             if (has("dafutier", allIds)) qingxianDamage *= 1.5;
@@ -431,6 +433,10 @@
 
                 const fuwenEligible = (id === "nanali" || id === "baicang" || id === "adele" || id === "zaowu");
                 if (scenario.fuwenCount > 0 && fuwenEligible) dmg *= 1.20;
+
+                if (jinranActive && (id === "yi" || id === "hasuoer" || id === "haniya")) dmg *= 1.30;
+                if (mainId === "yi" && id === "hasuoer") dmg *= 1.10;
+                if (yingxuActive && id === "hasuoer") dmg *= 2.00;
 
                 const ignoreAtk = (id === "xiaozhi" || id === "adele");
                 if (!ignoreAtk) dmg *= (1 + atkBonus);
