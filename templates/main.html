@@ -466,9 +466,10 @@
             let creationFinal = creationDamage;
 
             if (has("adele", allIds) && scenario.zhuoranCount > 0) {
-                creationFinal *= 1.03;
-                zhuoranDamage *= 1.03;
-                anxingDamage *= 1.03;
+                const adlerBoost = (mainId === "baicang" && has("dafutier", allIds)) ? 1.06 : 1.03;
+                creationFinal *= adlerBoost;
+                zhuoranDamage *= adlerBoost;
+                anxingDamage *= adlerBoost;
             }
 
             const total = personalSum + creationFinal + zhuoranDamage + anxingDamage + qingxianDamage;
