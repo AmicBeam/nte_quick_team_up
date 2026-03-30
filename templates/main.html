@@ -347,6 +347,11 @@
                 id: card.dataset.id,
                 name: card.querySelector(".name").textContent
             };
+            if ((selectedMain.id === "anhunqu0" || selectedMain.id === "anhunqu1") && selectedTeam.has("anhunquT1")) {
+                selectedTeam.delete("anhunquT1");
+                const teammateCard = teamGrid.querySelector('.card[data-id="anhunquT1"]');
+                if (teammateCard) teammateCard.classList.remove("selected");
+            }
             updateSummary();
         }
 
@@ -358,6 +363,10 @@
             } else {
                 if (selectedTeam.size >= 3) {
                     hintText.textContent = "队友已满 3 人";
+                    return;
+                }
+                if (id === "anhunquT1" && selectedMain && (selectedMain.id === "anhunqu0" || selectedMain.id === "anhunqu1")) {
+                    hintText.textContent = "安魂曲主C时不可选择安魂曲队友";
                     return;
                 }
                 if (id === "dafutier0" && selectedTeam.has("dafutier1")) {
@@ -392,9 +401,11 @@
             if (id === "baicang") return 1.6 / 1.2;
             if (id === "nanali") return 1.2;
             if (id === "xiaozhi") return 3.0;
-            if (id === "anhunqu") return 1.8;
+            if (id === "anhunqu1") return 1.8;
+            if (id === "anhunqu0") return 1.8;
             if (id === "jiuyuan") return 0.8;
             if (id === "xun") return 0.6;
+            if (id === "anhunquT1") return 0.2;
             if (id === "dafutier1") return 0.7;
             if (id === "dafutier0") return 0.4;
             if (id === "hasuoer") return 0.4 / 1.8;
@@ -410,7 +421,7 @@
         function computeLayers(allIds) {
             let layers = 0;
             if (has("zaowu", allIds)) layers += 1;
-            if (has("anhunqu", allIds)) layers += 1;
+            if (has("anhunqu0", allIds) || has("anhunqu1", allIds) || has("anhunquT1", allIds)) layers += 1;
             if (has("zaowu", allIds) && has("adele", allIds)) layers += 1;
             if (has("zaowu", allIds) && has("baicang", allIds)) layers += 0.5;
             return layers;
@@ -443,8 +454,9 @@
             if (hasDafutier1) qingxianDamage *= 1.5;
             if (hasDafutier0) qingxianDamage *= 1.25;
             if (mainId === "xiaozhi" && hasDafutier0) qingxianDamage *= 1.15;
+            const baseQingxianDamage = qingxianDamage;
 
-            const masteryProviders = [null];
+            const masteryProviders = has("anhunquT1", allIds) ? ["anhunquT1"] : [null];
             if (zhujueMode === "mastery" && has("zhujue", allIds)) masteryProviders.push("zhujue");
             if (has("zaowu", allIds)) masteryProviders.push("zaowu");
             // if (has("adele", allIds)) masteryProviders.push("adele");
@@ -465,6 +477,9 @@
                     anxing = 1.9;
                 } else if (providerId === "zaowu" || providerId === "adele") {
                     zhuoran = 1.75;
+                } else if (providerId === "anhunquT1") {
+                    zhuoran = 1.9;
+                    anxing = 1.9;
                 }
 
                 return { creation, zhuoran, anxing };
@@ -498,13 +513,14 @@
                     }
 
                     if (id === "adele") dmg *= adeleLayerBoost;
-                    if (id === "anhunqu") dmg *= anhunquLayerBoost;
+                    if (id === "anhunqu0" || id === "anhunqu1" || id === "anhunquT1") dmg *= anhunquLayerBoost;
 
                     if (mainId === "xiaozhi" && (id === "zhujue" || id === "hasuoer" || id === "adele" || id === "zaowu" || id === "haniya")) {
                         dmg *= 0.5;
                     }
 
-                    if (masteryProviderId && masteryProviderId !== "zhujue" && id === masteryProviderId) {
+                    const isMasteryBuild = (id === "anhunquT1") || (masteryProviderId && masteryProviderId !== "zhujue" && id === masteryProviderId);
+                    if (isMasteryBuild) {
                         dmg *= 0.6;
                     }
 
@@ -531,23 +547,28 @@
                 const creationExtraPart = creationCountNoMasteryDouble * 0.15;
                 const creationDamage = (creationBasePart + creationExtraPart) * creationMult;
 
+                const cappedZhuoranCount = Math.min(zhuoranCount, 1);
                 let creationFinal = creationDamage * boost.creation;
-                let zhuoranDamage = zhuoranCount * 0.2 * personal.zhuoranLayerBoost * boost.zhuoran;
+                let zhuoranDamage = cappedZhuoranCount * 0.2 * personal.zhuoranLayerBoost * boost.zhuoran;
                 let anxingDamage = anxingCount * 0.3 * boost.anxing;
 
-                if (has("adele", allIds) && zhuoranCount > 0) {
+                if (has("adele", allIds) && cappedZhuoranCount > 0) {
                     const adlerBoost = (mainId === "baicang" && (hasDafutier0 || hasDafutier1)) ? 1.06 : 1.03;
                     creationFinal *= adlerBoost;
                     zhuoranDamage *= adlerBoost;
                     anxingDamage *= adlerBoost;
                 }
 
-                let total = personal.personalSum + creationFinal + zhuoranDamage + anxingDamage + qingxianDamage;
+                const shixieCount = (cappedZhuoranCount > 0 && anxingCount > 0) ? (cappedZhuoranCount * anxingCount) : 0;
+                const finalQingxianDamage = baseQingxianDamage * (1 + 0.3 * shixieCount);
+
+                let total = personal.personalSum + creationFinal + zhuoranDamage + anxingDamage + finalQingxianDamage;
                 if (mainId === "baicang") total *= 1.05;
                 const notes = [];
                 if (scenario.fuwenCount > 0) notes.push("覆纹");
                 if (jinranActive) notes.push("浸染");
                 if (yingxuActive) notes.push("盈蓄");
+                if (shixieCount > 0) notes.push("失谐");
 
                 return {
                     total,
@@ -556,7 +577,7 @@
                     creationFinal,
                     zhuoranDamage,
                     anxingDamage,
-                    qingxianDamage,
+                    qingxianDamage: finalQingxianDamage,
                     notes
                 };
             }
@@ -589,6 +610,7 @@
             const allIds = [mainId, ...teamIds];
             const unique = new Set(allIds);
             if (unique.size !== 4) return null;
+            if ((mainId === "anhunqu0" || mainId === "anhunqu1") && teamIds.includes("anhunquT1")) return null;
 
             const baseScenario = {
                 creationCountBase: has("zhujue", allIds) ? 1 : 0,
@@ -599,21 +621,39 @@
             };
 
             const teamHasElem = (elem) => teamIds.some(id => elemMap[id] === elem);
+            const hasElemExcluding = (elem, excludeId) => [mainId, ...teamIds].some(id => id !== excludeId && elemMap[id] === elem);
+
+            function applyAnhunquTeammateScenarioVariants(s) {
+                if (!teamIds.includes("anhunquT1")) return [s];
+                if (mainId === "anhunqu0" || mainId === "anhunqu1") return [];
+                const z = hasElemExcluding("咒", "anhunquT1") ? 1 : 0;
+                const a = hasElemExcluding("魂", "anhunquT1") ? 1 : 0;
+                const out = [s];
+                if (z > 0) out.push({ ...s, zhuoranCount: (s.zhuoranCount || 0) + 1 });
+                if (a > 0) out.push({ ...s, anxingCount: (s.anxingCount || 0) + 1 });
+                return out;
+            }
+
+            function pickBestFromScenarios(scenarios) {
+                const results = scenarios.map(s => computeScenarioTotal(mainId, teamIds, s)).filter(Boolean);
+                if (results.length === 0) return null;
+                return results.reduce((best, cur) => (cur.total > best.total ? cur : best), results[0]);
+            }
 
             if (mainId === "xiaozhi") {
                 const extra = teamHasElem("灵") ? 1 : 0;
                 const s = { ...baseScenario, creationCountNoMasteryDouble: extra };
-                return computeScenarioTotal(mainId, teamIds, s);
+                return pickBestFromScenarios(applyAnhunquTeammateScenarioVariants(s));
             }
 
             if (mainId === "nanali" || mainId === "bohe") {
                 const sA = { ...baseScenario };
                 if (teamHasElem("光")) sA.creationCountBase += (mainId === "nanali" ? 0.5 : 1);
-                const tA = computeScenarioTotal(mainId, teamIds, sA);
+                const tA = pickBestFromScenarios(applyAnhunquTeammateScenarioVariants(sA));
 
                 const sB = { ...baseScenario };
                 if (teamHasElem("咒")) sB.fuwenCount = 1;
-                const tB = computeScenarioTotal(mainId, teamIds, sB);
+                const tB = pickBestFromScenarios(applyAnhunquTeammateScenarioVariants(sB));
 
                 if (!tA) return tB;
                 if (!tB) return tA;
@@ -623,30 +663,45 @@
             if (mainId === "baicang") {
                 const sA = { ...baseScenario };
                 if (teamHasElem("暗")) sA.zhuoranCount = 1;
-                const tA = computeScenarioTotal(mainId, teamIds, sA);
+                const tA = pickBestFromScenarios(applyAnhunquTeammateScenarioVariants(sA));
 
                 const sB = { ...baseScenario };
                 if (teamHasElem("灵")) sB.fuwenCount = 1;
-                const tB = computeScenarioTotal(mainId, teamIds, sB);
+                const tB = pickBestFromScenarios(applyAnhunquTeammateScenarioVariants(sB));
 
                 if (!tA) return tB;
                 if (!tB) return tA;
                 return tA.total >= tB.total ? tA : tB;
             }
 
-            if (mainId === "anhunqu") {
-                const sA = { ...baseScenario, zhuoranCount: teamHasElem("咒") ? 1 : 0 };
-                const tA = computeScenarioTotal(mainId, teamIds, sA);
+            if (mainId === "anhunqu1") {
+                const z = teamHasElem("咒") ? 1 : 0;
+                const a = teamHasElem("魂") ? 1 : 0;
 
-                const sB = { ...baseScenario, anxingCount: teamHasElem("魂") ? 1 : 0 };
-                const tB = computeScenarioTotal(mainId, teamIds, sB);
+                const t0 = computeScenarioTotal(mainId, teamIds, { ...baseScenario });
+                const tZ = computeScenarioTotal(mainId, teamIds, { ...baseScenario, zhuoranCount: z });
+                const tA = computeScenarioTotal(mainId, teamIds, { ...baseScenario, anxingCount: a });
+                const tZA = computeScenarioTotal(mainId, teamIds, { ...baseScenario, zhuoranCount: z, anxingCount: a });
 
-                if (!tA) return tB;
-                if (!tB) return tA;
-                return tA.total >= tB.total ? tA : tB;
+                const ts = [t0, tZ, tA, tZA].filter(Boolean);
+                if (ts.length === 0) return null;
+                return ts.reduce((best, cur) => (cur.total > best.total ? cur : best), ts[0]);
             }
 
-            return computeScenarioTotal(mainId, teamIds, baseScenario);
+            if (mainId === "anhunqu0") {
+                const z = teamHasElem("咒") ? 1 : 0;
+                const a = teamHasElem("魂") ? 1 : 0;
+
+                const t0 = computeScenarioTotal(mainId, teamIds, { ...baseScenario });
+                const tZ = computeScenarioTotal(mainId, teamIds, { ...baseScenario, zhuoranCount: z });
+                const tA = computeScenarioTotal(mainId, teamIds, { ...baseScenario, anxingCount: a });
+
+                const ts = [t0, tZ, tA].filter(Boolean);
+                if (ts.length === 0) return null;
+                return ts.reduce((best, cur) => (cur.total > best.total ? cur : best), ts[0]);
+            }
+
+            return pickBestFromScenarios(applyAnhunquTeammateScenarioVariants(baseScenario));
         }
 
         function calculateScore() {
