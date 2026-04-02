@@ -559,7 +559,10 @@
                     anxingDamage *= adlerBoost;
                 }
 
-                const shixieCount = (cappedZhuoranCount > 0 && anxingCount > 0) ? (cappedZhuoranCount * anxingCount) : 0;
+                let shixieCount = (cappedZhuoranCount > 0 && anxingCount > 0) ? (cappedZhuoranCount * anxingCount) : 0;
+                if (has("baicang", allIds)) {
+                    shixieCount *= 2;
+                }
                 const finalQingxianDamage = baseQingxianDamage * (1 + 0.3 * shixieCount);
 
                 let total = personal.personalSum + creationFinal + zhuoranDamage + anxingDamage + finalQingxianDamage;
