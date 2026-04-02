@@ -220,6 +220,26 @@
             color: var(--muted);
             font-size: 14px;
         }
+        .cloud-float-btn {
+            position: fixed;
+            top: 14px;
+            right: 14px;
+            z-index: 50;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 14px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent), #6ea8ff);
+            color: #0b0f24;
+            font-weight: 800;
+            font-size: 14px;
+            text-decoration: none;
+            box-shadow: 0 10px 20px rgba(78, 135, 255, 0.35);
+        }
+        .cloud-float-btn:hover {
+            filter: brightness(1.05);
+        }
         @media (max-width: 760px) {
             .hero {
                 flex-direction: column;
@@ -233,6 +253,7 @@
     </style>
 </head>
 <body>
+    <a class="cloud-float-btn" href="/cloud-team">详细计算</a>
     <div class="page">
         <div class="hero">
             <div>

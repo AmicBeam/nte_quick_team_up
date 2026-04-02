@@ -1,11 +1,14 @@
 # SPDX-License-Identifier: GPL-3.0-only
 # Copyright (C) 2025 AmicBeam
-from flask import Flask, render_template
+from flask import Flask, render_template, request, send_from_directory
 import random
+from pathlib import Path
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.jinja_env.auto_reload = True
+
+STATIC_DIR = Path(app.root_path) / "static"
 
 MAIN_CANDIDATES = [
     {"id": "bohe", "name": "薄荷", "image": "薄荷.png", "elem": "灵"},
@@ -27,7 +30,7 @@ TEAMMATES = [
     {"id": "anhunquT1", "name": "安魂曲（1觉）", "image": "安魂曲.png", "elem": "暗"},
     {"id": "dafutier0", "name": "达芙蒂尔（0觉）", "image": "达芙蒂尔.png", "elem": "暗"},
     {"id": "dafutier1", "name": "达芙蒂尔（1觉）", "image": "达芙蒂尔.png", "elem": "暗"},
-    {"id": "fatiya", "name": "法蒂娅", "image": "法帝娅.png", "elem": "魂"},
+    {"id": "fatiya", "name": "法帝娅", "image": "法帝娅.png", "elem": "魂"},
     {"id": "haniya", "name": "哈尼娅", "image": "哈尼娅.png", "elem": "魂"},
     {"id": "hasuoer", "name": "哈索尔", "image": "哈索尔.png", "elem": "相"},
 ]
@@ -41,6 +44,35 @@ def home():
         else:
             teammates.append(item)
     return render_template("main.html", main_candidates=MAIN_CANDIDATES, teammates=teammates)
+
+@app.route("/cloud-team")
+def cloud_team():
+    return render_template("cloud_team.html")
+
+@app.route("/cloud-gear")
+def cloud_gear():
+    return render_template("cloud_gear.html")
+
+@app.route("/cloud-avatar")
+def cloud_avatar():
+    name = (request.args.get("name") or "").strip()
+    if not name:
+        return send_from_directory(STATIC_DIR, "单位.jpg")
+    if name == "主角":
+        filename = "男主.png"
+        if (STATIC_DIR / filename).exists():
+            return send_from_directory(STATIC_DIR, filename)
+        return send_from_directory(STATIC_DIR, "单位.jpg")
+    normalized = name.split("（", 1)[0].split("(", 1)[0].strip()
+    for item in TEAMMATES + MAIN_CANDIDATES:
+        if item.get("name") in (name, normalized):
+            filename = item.get("image")
+            if filename and (STATIC_DIR / filename).exists():
+                return send_from_directory(STATIC_DIR, filename)
+    for cand in (f"{name}.png", f"{normalized}.png", "单位.jpg"):
+        if (STATIC_DIR / cand).exists():
+            return send_from_directory(STATIC_DIR, cand)
+    return send_from_directory(STATIC_DIR, "单位.jpg")
 
 # 启动Flask应用
 if __name__ == '__main__':
