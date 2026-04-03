@@ -46,7 +46,10 @@
 - 修改 `static/cloud/*` 的 JS/CSS 后，需要同步更新模板里的 `?v=...`，避免浏览器仍命中旧资源：
   - [cloud_team.html](file:///Users/bytedance/projects/nte_quick_team_up/templates/cloud_team.html)
   - [cloud_gear.html](file:///Users/bytedance/projects/nte_quick_team_up/templates/cloud_gear.html)
-- xlsx 文件走浏览器 CacheStorage；若替换了 xlsx，必要时升级 cacheName 或提醒用户清缓存。
+- xlsx 缓存策略：
+  - 优先使用 CacheStorage（`window.caches`）缓存 xlsx。
+  - 若运行环境不支持 CacheStorage（例如 `caches is not defined`），自动降级使用 IndexedDB 持久缓存。
+  - 若替换了 xlsx 内容，需要升级 [cloudWorkbook.js](file:///Users/bytedance/projects/nte_quick_team_up/static/cloud/cloudWorkbook.js) 里的 `CACHE_NAME`，以触发缓存失效更新。
 
 ### 6. 验证与回归
 

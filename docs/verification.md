@@ -64,7 +64,10 @@
  
  ## 4. 浏览器缓存说明
  
- 网页会把 xlsx 放入浏览器 CacheStorage（cacheName：`cloud-xlsx-v1`），避免多次拉取同一个文件。
+网页会对 xlsx 做持久缓存，避免多次拉取同一个文件：
+
+- 优先：CacheStorage（cacheName：`cloud-xlsx-v1`）
+- 兼容降级：若运行环境不支持 CacheStorage（例如 `caches is not defined`），使用 IndexedDB 做持久缓存（DB：`cloud-xlsx-cache`）
  
  如果你更新了仓库内的 xlsx 文件但浏览器仍使用旧文件：
  - 改一下 cacheName（例如 `cloud-xlsx-v2`）或

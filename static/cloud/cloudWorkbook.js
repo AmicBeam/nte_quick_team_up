@@ -66,15 +66,75 @@
  }
  
  async function fetchWorkbookArrayBuffer(url) {
-   const cache = await caches.open(CACHE_NAME);
-   const cached = await cache.match(url);
-   if (cached) {
-     return await cached.arrayBuffer();
-   }
-   const res = await fetch(url, { cache: "no-store" });
-   if (!res.ok) throw new Error(`Failed to fetch xlsx: ${res.status}`);
-   await cache.put(url, res.clone());
-   return await res.arrayBuffer();
+  const hasCaches = typeof caches !== "undefined" && caches && typeof caches.open === "function";
+  const hasIDB = typeof indexedDB !== "undefined" && indexedDB;
+  const idbKey = `${CACHE_NAME}::${url}`;
+
+  const idbOpen = () => new Promise((resolve, reject) => {
+    const req = indexedDB.open("cloud-xlsx-cache", 1);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains("items")) db.createObjectStore("items", { keyPath: "k" });
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+
+  const idbGet = async () => {
+    if (!hasIDB) return null;
+    try {
+      const db = await idbOpen();
+      return await new Promise((resolve) => {
+        const tx = db.transaction("items", "readonly");
+        const store = tx.objectStore("items");
+        const req = store.get(idbKey);
+        req.onsuccess = () => resolve(req.result || null);
+        req.onerror = () => resolve(null);
+      });
+    } catch {
+      return null;
+    }
+  };
+
+  const idbPut = async (buf) => {
+    if (!hasIDB) return;
+    try {
+      const db = await idbOpen();
+      await new Promise((resolve) => {
+        const tx = db.transaction("items", "readwrite");
+        const store = tx.objectStore("items");
+        store.put({ k: idbKey, ts: Date.now(), blob: new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }) });
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => resolve();
+      });
+    } catch {}
+  };
+
+  if (hasCaches) {
+    try {
+      const cache = await caches.open(CACHE_NAME);
+      const cached = await cache.match(url);
+      if (cached) return await cached.arrayBuffer();
+    } catch {}
+  } else {
+    const hit = await idbGet();
+    if (hit?.blob) {
+      try { return await hit.blob.arrayBuffer(); } catch {}
+    }
+  }
+
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) throw new Error(`Failed to fetch xlsx: ${res.status}`);
+  const buf = await res.arrayBuffer();
+  if (hasCaches) {
+    try {
+      const cache = await caches.open(CACHE_NAME);
+      await cache.put(url, new Response(buf));
+    } catch {}
+  } else {
+    await idbPut(buf);
+  }
+  return buf;
  }
  
  function sheetToMatrix(sheet) {
