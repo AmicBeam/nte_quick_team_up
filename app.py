@@ -37,6 +37,10 @@ TEAMMATES = [
 
 @app.route("/")
 def home():
+    return preteam()
+
+@app.route("/preteam")
+def preteam():
     teammates = []
     for item in TEAMMATES:
         if item["id"] == "zhujue":

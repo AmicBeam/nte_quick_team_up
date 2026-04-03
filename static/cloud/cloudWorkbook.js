@@ -319,6 +319,7 @@ export class CloudWorkbook {
     this.physicalSlotCount = 20;
     this.slotCount = 20;
     this._teamBindings = null;
+    this._uiBindings = null;
    }
  
    getValue(sheetName, addr) {
@@ -390,6 +391,9 @@ export class CloudWorkbook {
     const dpsLabel = find("DPS");
     const totalLabel = find("累计伤害");
     const contribLabel = find("贡献伤害");
+    const trapLabel = find("贡献倾陷");
+    const energyLabel = find("累计回能");
+    const ringLabel = find("累计环合");
     const dpsAddr = dpsLabel ? coordToAddr(dpsLabel.row + 1, dpsLabel.col) : "AD7";
     const totalAddr = totalLabel ? coordToAddr(totalLabel.row + 1, totalLabel.col) : "AD5";
     const dpsValue = this.getValue("云配队", dpsAddr);
@@ -398,6 +402,9 @@ export class CloudWorkbook {
       dps: isFiniteNumber(dpsValue) && !isErrorValue(dpsValue) ? { sheet: "云配队", addr: dpsAddr } : { sheet: "云配队", addr: "AD7" },
       totalDamage: isFiniteNumber(totalValue) && !isErrorValue(totalValue) ? { sheet: "云配队", addr: totalAddr } : { sheet: "云配队", addr: "AD5" },
       contribDamageCol: contribLabel ? contribLabel.col : addrToCoord("AG3").col,
+      contribTrapCol: trapLabel ? trapLabel.col : addrToCoord("AH3").col,
+      contribEnergyCol: energyLabel ? energyLabel.col : addrToCoord("AI3").col,
+      contribRingCol: ringLabel ? ringLabel.col : addrToCoord("AJ3").col,
       contribStartRow: addrToCoord("AG4").row,
     };
     this._teamBindings = bindings;
@@ -417,6 +424,24 @@ export class CloudWorkbook {
   getTeamContribDamage(i) {
     const b = this.resolveTeamBindings();
     const addr = coordToAddr(b.contribStartRow + i, b.contribDamageCol);
+    return this.getValue("云配队", addr);
+  }
+
+  getTeamContribTrap(i) {
+    const b = this.resolveTeamBindings();
+    const addr = coordToAddr(b.contribStartRow + i, b.contribTrapCol);
+    return this.getValue("云配队", addr);
+  }
+
+  getTeamContribEnergy(i) {
+    const b = this.resolveTeamBindings();
+    const addr = coordToAddr(b.contribStartRow + i, b.contribEnergyCol);
+    return this.getValue("云配队", addr);
+  }
+
+  getTeamContribRing(i) {
+    const b = this.resolveTeamBindings();
+    const addr = coordToAddr(b.contribStartRow + i, b.contribRingCol);
     return this.getValue("云配队", addr);
   }
 
@@ -452,7 +477,7 @@ export class CloudWorkbook {
      const { groupStartCol0, groupWidth } = this.calcMeta;
  
     const insertAt = addrToCoord("AD1").col;
-    this.hf.addColumns(teamId, insertAt, add);
+    this.hf.addColumns(teamId, [insertAt, add]);
  
     const templateFromCol = groupStartCol0 + groupWidth * (this.physicalSlotCount - 1);
      const templateToCol = templateFromCol + groupWidth - 1;
@@ -460,12 +485,12 @@ export class CloudWorkbook {
  
      for (let i = 0; i < add; i++) {
       const targetFromCol = groupStartCol0 + groupWidth * (this.physicalSlotCount + i);
-       this.hf.addColumns(calcId, targetFromCol, groupWidth);
-       const clipboard = this.hf.copy(
-         { sheet: calcId, row: 0, col: templateFromCol },
-         { sheet: calcId, row: copyHeight - 1, col: templateToCol },
-       );
-       this.hf.paste({ sheet: calcId, row: 0, col: targetFromCol }, clipboard);
+       this.hf.addColumns(calcId, [targetFromCol, groupWidth]);
+       this.hf.copy({
+         start: { sheet: calcId, row: 0, col: templateFromCol },
+         end: { sheet: calcId, row: copyHeight - 1, col: templateToCol },
+       });
+       this.hf.paste({ sheet: calcId, row: 0, col: targetFromCol });
        const idxAddr = coordToAddr(0, targetFromCol);
       this.setValue("计算", idxAddr, this.physicalSlotCount + i + 1);
      }
@@ -475,6 +500,7 @@ export class CloudWorkbook {
     const endCol = numberToCol(colToNumber("J") + this.physicalSlotCount - 1);
     this.updateCalcInputRanges(endCol);
     this._teamBindings = null;
+    this._uiBindings = null;
    }
 
   setActiveSlots(n) {
@@ -490,8 +516,70 @@ export class CloudWorkbook {
     }
     this.slotCount = target;
     this._teamBindings = null;
+    this._uiBindings = null;
   }
  
+  resolveUiBindings() {
+    if (this._uiBindings) return this._uiBindings;
+    const sheetId = this.sheetIdByName.get("云配队");
+    const dims = this.hf.getSheetDimensions(sheetId);
+    const find = (needle) => {
+      for (let r = 0; r < dims.height; r++) {
+        for (let c = 0; c < dims.width; c++) {
+          const v = this.hf.getCellValue({ sheet: sheetId, row: r, col: c });
+          if (String(v ?? "").trim() === needle) return { row: r, col: c };
+        }
+      }
+      return null;
+    };
+    const below = (p) => (p ? { row: p.row + 1, col: p.col } : null);
+    const right = (p) => (p ? { row: p.row, col: p.col + 1 } : null);
+    const axisLabel = find("指定轴长");
+    const cumTimeLabel = find("累计时间");
+    const cumTrapLabel = find("累计倾陷");
+    const extraLabels = ["创生", "浊燃", "黯星", "倾陷"];
+    const extra = {};
+    for (const k of extraLabels) extra[k] = right(find(k));
+    this._uiBindings = {
+      axisTime: below(axisLabel),
+      cumTime: below(cumTimeLabel),
+      cumTrap: below(cumTrapLabel),
+      extra,
+    };
+    return this._uiBindings;
+  }
+
+  getAxisTimeLength() {
+    const b = this.resolveUiBindings();
+    if (!b.axisTime) return null;
+    return this.hf.getCellValue({ sheet: this.sheetIdByName.get("云配队"), row: b.axisTime.row, col: b.axisTime.col });
+  }
+
+  setAxisTimeLength(v) {
+    const b = this.resolveUiBindings();
+    if (!b.axisTime) return;
+    this.hf.setCellContents({ sheet: this.sheetIdByName.get("云配队"), row: b.axisTime.row, col: b.axisTime.col }, [[v ?? null]]);
+  }
+
+  getCumulativeTime() {
+    const b = this.resolveUiBindings();
+    if (!b.cumTime) return null;
+    return this.hf.getCellValue({ sheet: this.sheetIdByName.get("云配队"), row: b.cumTime.row, col: b.cumTime.col });
+  }
+
+  getCumulativeTrap() {
+    const b = this.resolveUiBindings();
+    if (!b.cumTrap) return null;
+    return this.hf.getCellValue({ sheet: this.sheetIdByName.get("云配队"), row: b.cumTrap.row, col: b.cumTrap.col });
+  }
+
+  getExtraDamage(label) {
+    const b = this.resolveUiBindings();
+    const p = b.extra?.[label];
+    if (!p) return null;
+    return this.hf.getCellValue({ sheet: this.sheetIdByName.get("云配队"), row: p.row, col: p.col });
+  }
+
    exportState() {
     const team = {
       roles: [],
@@ -520,8 +608,9 @@ export class CloudWorkbook {
         team.buffs[String(rr)].push(this.getValue("云配队", addr));
       }
     }
-    const miscAddrs = ["F9", "G9", "H9", "F11", "H11", "G13"];
+    const miscAddrs = ["F9", "G9", "H9", "F11", "H11", "G11", "G13", "H13"];
     for (const a of miscAddrs) team.misc[a] = this.getValue("云配队", a);
+    team.misc["AD13"] = this.getAxisTimeLength();
  
     const gear = {};
     for (let i = 0; i < this.characters.length; i++) {
@@ -562,10 +651,25 @@ export class CloudWorkbook {
  
    importState(state) {
      if (!state || typeof state !== "object") throw new Error("Bad state");
-    const slotCount = Number(state.slotCount || 20);
-    if (slotCount > this.slotCount) this.ensureSlots(slotCount);
- 
     const team = state.team || {};
+    let inferred = 0;
+    if (Array.isArray(team.repeats)) inferred = Math.max(inferred, team.repeats.length);
+    if (Array.isArray(team.actions)) {
+      for (let r = 0; r < 4; r++) {
+        const row = team.actions[r];
+        if (Array.isArray(row)) inferred = Math.max(inferred, row.length);
+      }
+    }
+    if (team.buffs && typeof team.buffs === "object") {
+      for (const arr of Object.values(team.buffs)) {
+        if (Array.isArray(arr)) inferred = Math.max(inferred, arr.length);
+      }
+    }
+    const explicit = Number(state.slotCount);
+    const base = Number.isFinite(explicit) && explicit > 0 ? explicit : (inferred || 0) || 20;
+    const slotCount = Math.max(12, base);
+    this.setActiveSlots(slotCount);
+ 
     if (Array.isArray(team.roles)) {
       for (let i = 0; i < 4; i++) this.setValue("云配队", `F${4 + i}`, team.roles[i] ?? null);
     }
@@ -597,6 +701,10 @@ export class CloudWorkbook {
     }
     if (team.misc && typeof team.misc === "object") {
       for (const [addr, value] of Object.entries(team.misc)) {
+        if (addr === "AD13") {
+          this.setAxisTimeLength(value ?? null);
+          continue;
+        }
         if (!/^[A-Z]+\d+$/.test(addr)) continue;
         this.setValue("云配队", addr, value ?? null);
       }

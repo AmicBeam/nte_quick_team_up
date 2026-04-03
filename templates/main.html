@@ -31,6 +31,7 @@
             max-width: 1100px;
             margin: 0 auto;
             padding: 40px 24px 80px;
+            position: relative;
         }
         .hero {
             display: flex;
@@ -221,9 +222,9 @@
             font-size: 14px;
         }
         .cloud-float-btn {
-            position: fixed;
-            top: 14px;
-            right: 14px;
+            position: absolute;
+            top: 40px;
+            right: 24px;
             z-index: 50;
             display: inline-flex;
             align-items: center;
@@ -253,8 +254,8 @@
     </style>
 </head>
 <body>
-    <a class="cloud-float-btn" href="/cloud-team">详细计算</a>
     <div class="page">
+        <a class="cloud-float-btn" href="/cloud-team">详细计算</a>
         <div class="hero">
             <div>
                 <h1>异环预配队（三测数据）</h1>

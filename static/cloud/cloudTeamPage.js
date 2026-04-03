@@ -157,19 +157,40 @@ function openSelectInCell(cell, values, currentValue, onCommit) {
    const misc = document.getElementById("misc");
    misc.innerHTML = "";
    const items = [
+     { label: "指定轴长", type: "axisTime", step: "1" },
      { label: "角色等级", sheet: "云配队", addr: "F9", type: "number", step: "1" },
      { label: "怪物等级", sheet: "云配队", addr: "G9", type: "number", step: "1" },
      { label: "倾陷上限", sheet: "云配队", addr: "H9", type: "number", step: "1" },
+     { label: "怪物弱点", sheet: "云配队", addr: "G11", type: "select", options: ["无", "光", "灵", "咒", "暗", "魂", "相"] },
      { label: "怪物抗性", sheet: "云配队", addr: "F11", type: "number", step: "0.01" },
      { label: "弱点减抗", sheet: "云配队", addr: "H11", type: "number", step: "0.01" },
      { label: "对敌类型", sheet: "云配队", addr: "G13", type: "select", options: ["群怪", "BOSS"] },
+     { label: "早雾DOT层数", sheet: "云配队", addr: "H13", type: "number", step: "1" },
    ];
    for (const it of items) {
-     const cur = wb.getValue(it.sheet, it.addr);
+     const cur = it.type === "axisTime" ? wb.getAxisTimeLength() : wb.getValue(it.sheet, it.addr);
      let input;
+     if (it.type === "axisTime") {
+       input = el("input", { type: "number", step: it.step || "1", value: String(cur ?? ""), oninput: () => {} });
+       input.addEventListener("change", () => {
+         const v = input.value === "" ? null : Number(input.value);
+         wb.setAxisTimeLength(Number.isFinite(v) ? v : null);
+         wb.recalc();
+         refreshAfterMutation(wb);
+       });
+       misc.appendChild(el("div", { class: "field" }, [el("label", {}, [it.label]), input]));
+       continue;
+     }
      if (it.type === "select") {
-      input = el("select", { onchange: () => { wb.setValue(it.sheet, it.addr, input.value); wb.recalc(); refreshAfterMutation(wb); } }, it.options.map(o => el("option", { value: o }, [o])));
-       input.value = String(cur ?? "");
+      input = el("select", {}, it.options.map(o => el("option", { value: o }, [o])));
+      if (it.addr === "G11") input.value = String(cur ?? "").trim() || "无";
+      else input.value = String(cur ?? "");
+      input.addEventListener("change", () => {
+        const v = it.addr === "G11" && input.value === "无" ? null : input.value;
+        wb.setValue(it.sheet, it.addr, v);
+        wb.recalc();
+        refreshAfterMutation(wb);
+      });
      } else {
        input = el("input", { type: "number", step: it.step || "1", value: String(cur ?? ""), oninput: () => {} });
        input.addEventListener("change", () => {
@@ -212,7 +233,7 @@ function autoResizeSlots(wb, allowExpand = true) {
   while (wb.slotCount > MIN_SLOTS && !hasContentInSlot(wb.slotCount - 1)) {
     wb.setActiveSlots(wb.slotCount - 1);
   }
-  if (allowExpand && hasContentInSlot(wb.slotCount - 1) && wb.slotCount < 200) {
+  if (allowExpand && wb.slotCount < 200 && hasContentInSlot(wb.slotCount - 1)) {
     wb.setActiveSlots(wb.slotCount + 1);
   }
 }
@@ -250,6 +271,18 @@ function refreshAfterMutation(wb) {
   refreshAfterMutation.__queued = true;
   queueMicrotask(() => {
     refreshAfterMutation.__queued = false;
+    const isNearEnd = (id) => {
+      const elx = document.getElementById(id);
+      if (!elx) return false;
+      const max = elx.scrollWidth - elx.clientWidth;
+      if (max <= 0) return true;
+      return elx.scrollLeft >= max - 180;
+    };
+    const nearEndAction = isNearEnd("actionScroll");
+    const nearEndConfig = isNearEnd("configScroll");
+    const nearEndBuff = isNearEnd("buffScroll");
+
+    const beforeSlots = wb.slotCount;
     let roleChanged = false;
     const defRole = wb.characters && wb.characters.length ? wb.characters[0] : "";
     if (defRole) {
@@ -262,10 +295,17 @@ function refreshAfterMutation(wb) {
         }
       }
     }
-    if (roleChanged) wb.recalc();
+    autoResizeSlots(wb, true);
+    if (roleChanged || wb.slotCount !== beforeSlots) wb.recalc();
     saveState(wb);
     try {
       renderAll(wb);
+      if (wb.slotCount !== beforeSlots) {
+        if (nearEndAction) scrollState.action = 1e9;
+        if (nearEndConfig) scrollState.config = 1e9;
+        if (nearEndBuff) scrollState.buff = 1e9;
+        applyScrollState();
+      }
       const gearTable = document.getElementById("gearTable");
       if (gearTable && typeof renderGearTable === "function") renderGearTable(wb, gearTable);
     } catch (e) {
@@ -277,6 +317,31 @@ function refreshAfterMutation(wb) {
 
 function clamp(n, a, b) {
   return Math.max(a, Math.min(b, n));
+}
+
+function getCalcSlotSeries(wb, key, rowIndex0) {
+  if (!wb || !wb.hf || !wb.sheetIdByName || !wb.calcMeta) return null;
+  const calcId = wb.sheetIdByName.get("计算");
+  if (calcId === undefined || calcId === null) return null;
+  const { groupStartCol0, groupWidth } = wb.calcMeta;
+  if (!groupStartCol0 || !groupWidth) return null;
+  if (!wb.__calcKeyOffset) wb.__calcKeyOffset = new Map();
+  let off = wb.__calcKeyOffset.get(key);
+  if (off === undefined) {
+    off = null;
+    for (let i = 0; i < groupWidth; i++) {
+      const v = wb.hf.getCellValue({ sheet: calcId, row: 0, col: groupStartCol0 + i });
+      if (String(v ?? "").trim() === key) { off = i; break; }
+    }
+    wb.__calcKeyOffset.set(key, off);
+  }
+  if (off === null) return null;
+  const out = [];
+  for (let s = 0; s < wb.slotCount; s++) {
+    const col = groupStartCol0 + s * groupWidth + off;
+    out.push(wb.hf.getCellValue({ sheet: calcId, row: rowIndex0, col }));
+  }
+  return out;
 }
 
 function slotIndexFromClientX(scrollEl, clientX) {
@@ -311,13 +376,16 @@ function buildBlocks(slotCount, getValueAtSlot) {
 
 function renderTimelineRuler(wb, slotCount) {
   const row = el("div", { class: "tl-ruler", style: `width:${slotCount * SLOT_W}px` });
+  const fmtTime = (n) => {
+    const s = Number(n).toFixed(1);
+    return s.endsWith(".0") ? s.slice(0, -2) : s;
+  };
+  const deltas = getCalcSlotSeries(wb, "t", 7) || [];
+  let cum = 0;
   for (let s = 0; s < slotCount; s++) {
-    const col = numberToCol("J".charCodeAt(0) - 64 + s);
-    const computed = wb.getValue("云配队", `${col}10`);
-    const cached = wb.getCachedValue("云配队", `${col}10`);
-    const v = typeof computed === "object" && computed?.value ? cached : computed;
-    const num = typeof v === "number" && Number.isFinite(v) ? v : (v === null || v === undefined ? null : Number(v));
-    const txt = Number.isFinite(num) ? String(num) : "";
+    const delta = Number(deltas[s]);
+    if (Number.isFinite(delta)) cum += delta;
+    const txt = Number.isFinite(delta) && delta !== 0 ? fmtTime(cum) : "";
     row.appendChild(el("div", { class: "tl-tick", style: `left:${s * SLOT_W}px;width:${SLOT_W}px` }, [el("div", { class: "tl-tick-label" }, [txt])]));
   }
   return row;
@@ -618,6 +686,15 @@ function renderActionArea(wb) {
   }
   grid.appendChild(repeatLane);
 
+  left.appendChild(el("div", { class: "tl-left-cell compact center" }, ["伤害"]));
+  const dmgLane = el("div", { class: "tl-lane", style: `width:${wb.slotCount * SLOT_W}px` });
+  const damages = getCalcSlotSeries(wb, "d", 7) || [];
+  for (let s = 0; s < wb.slotCount; s++) {
+    const n = Number(damages[s]);
+    dmgLane.appendChild(el("div", { class: "tl-cell", style: `left:${s * SLOT_W}px;width:${SLOT_W}px` }, [el("div", { class: "tl-val" }, [Number.isFinite(n) && n !== 0 ? fmtNum(n) : ""])]));
+  }
+  grid.appendChild(dmgLane);
+
   scroll.appendChild(grid);
   wrap.appendChild(left);
   wrap.appendChild(scroll);
@@ -758,26 +835,53 @@ function applyScrollState() {
    const labels = [];
    for (let i = 0; i < 4; i++) {
      const name = String(wb.getValue("云配队", `F${4 + i}`) ?? "").trim() || `角色${i + 1}`;
-    const v = wb.getTeamContribDamage(i);
      labels.push(name);
-     series.push(Number(v) || 0);
+    const v = wb.getTeamContribDamage(i);
+    series.push(Number(v) || 0);
    }
  
   const list = document.getElementById("roleContribList");
   list.innerHTML = "";
-  const rows = labels.map((n, i) => `<tr><td>${n}</td><td style="text-align:right">${fmtNum(series[i])}</td></tr>`).join("");
-  const extra = [
-    { labelAddr: "AF8", valueAddr: "AG8" },
-    { labelAddr: "AF9", valueAddr: "AG9" },
-    { labelAddr: "AF10", valueAddr: "AG10" },
-    { labelAddr: "AF11", valueAddr: "AG11" },
-  ].map(x => ({
-    label: String(wb.getValue("云配队", x.labelAddr) ?? "").trim(),
-    value: wb.getValue("云配队", x.valueAddr),
-  })).filter(x => x.label);
+  const modeKey = "cloudContribMode";
+  const mode = (localStorage.getItem(modeKey) || "damage").trim();
+  const modes = [
+    { key: "damage", label: "贡献伤害" },
+    { key: "trap", label: "倾陷" },
+    { key: "energy", label: "回能" },
+    { key: "ring", label: "环合" },
+  ];
+  const getMetric = (k, i) => {
+    if (k === "damage") return wb.getTeamContribDamage(i);
+    if (k === "trap") return wb.getTeamContribTrap(i);
+    if (k === "energy") return wb.getTeamContribEnergy(i);
+    if (k === "ring") return wb.getTeamContribRing(i);
+    return wb.getTeamContribDamage(i);
+  };
+  const metricLabel = (modes.find(x => x.key === mode)?.label) || "贡献伤害";
+  const metricSeries = labels.map((_, i) => Number(getMetric(mode, i)) || 0);
+  const tabs = `<div class="metric-tabs">${modes.map(x => `<button class="metric-tab${x.key === mode ? " active" : ""}" data-mode="${x.key}">${x.label}</button>`).join("")}</div>`;
+  const rows = labels.map((n, i) => `<tr><td>${n}</td><td style="text-align:right">${fmtNum(metricSeries[i])}</td></tr>`).join("");
+  const roleTable = `<table class="table"><thead><tr><th>${metricLabel}</th><th style="text-align:right">数值</th></tr></thead><tbody>${rows}</tbody></table>`;
+  const extra = ["创生", "浊燃", "黯星", "倾陷"].map((label) => ({
+    label,
+    value: wb.getExtraDamage(label),
+  }));
   const extraRows = extra.map(x => `<tr><td>${x.label}</td><td style="text-align:right">${fmtNum(x.value)}</td></tr>`).join("");
-  const extraTable = extraRows ? `<table class="table" style="margin-top:10px"><thead><tr><th>类型贡献伤害</th><th style="text-align:right">数值</th></tr></thead><tbody>${extraRows}</tbody></table>` : "";
-  list.innerHTML = `<table class="table"><thead><tr><th>角色贡献伤害</th><th style="text-align:right">数值</th></tr></thead><tbody>${rows}</tbody></table>${extraTable}`;
+  const extraTable = `<table class="table" style="margin-top:10px"><thead><tr><th>类型贡献伤害</th><th style="text-align:right">数值</th></tr></thead><tbody>${extraRows}</tbody></table>`;
+  const cumTrap = wb.getCumulativeTrap();
+  const cumTime = wb.getCumulativeTime();
+  const miscRows = [
+    { label: "累计倾陷", value: cumTrap },
+  ];
+  const miscTable = `<table class="table" style="margin-top:10px"><thead><tr><th>其他统计结果</th><th style="text-align:right">数值</th></tr></thead><tbody>${miscRows.map(x => `<tr><td>${x.label}</td><td style="text-align:right">${fmtNum(x.value)}</td></tr>`).join("")}</tbody></table>`;
+  list.innerHTML = `${tabs}${roleTable}${extraTable}${miscTable}`;
+  list.querySelectorAll(".metric-tab").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const next = btn.getAttribute("data-mode") || "damage";
+      localStorage.setItem(modeKey, next);
+      renderResults(wb);
+    });
+  });
 
   const pieItems = [];
   for (let i = 0; i < 4; i++) pieItems.push({ name: labels[i], value: series[i] });
@@ -855,6 +959,7 @@ function applyScrollState() {
     },
     yAxis: {
       type: "category",
+      inverse: true,
       data: items.map(x => x.name),
       axisLabel: { color: "rgba(247,248,255,0.75)", width: 96, overflow: "truncate" },
       axisTick: { show: false },

@@ -5,7 +5,7 @@
    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
    <link rel="icon" href="{{ url_for('static', filename='单位.jpg') }}">
    <title>异环云配队 - 配装</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='cloud/cloud.css') }}?v=28" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='cloud/cloud.css') }}?v=37" />
    <script src="{{ url_for('static', filename='vendor/xlsx.full.min.js') }}"></script>
    <script src="{{ url_for('static', filename='vendor/hyperformula.full.min.js') }}"></script>
  </head>
@@ -14,8 +14,8 @@
      <div class="topbar">
        <h1>配装</h1>
        <div class="nav">
-        <a href="/cloud-team#main">主界面</a>
-         <a href="/">预配队</a>
+        <a class="btn secondary" href="/cloud-team#main">主界面</a>
+         <a class="btn secondary" href="/preteam">预配队</a>
        </div>
      </div>
  
@@ -28,6 +28,6 @@
      </div>
    </div>
  
-  <script type="module" src="{{ url_for('static', filename='cloud/cloudGearPage.js') }}?v=28"></script>
+  <script type="module" src="{{ url_for('static', filename='cloud/cloudGearPage.js') }}?v=36"></script>
  </body>
  </html>
