@@ -513,6 +513,8 @@
             const teamHasElem = (elem) => teamIds.some(id => elemMap[id] === elem);
             const jinranActive = (mainId === "yi") && teamHasElem("魂");
             const yingxuActive = (mainId === "yi") && has("zhujue", allIds) && has("jiuyuan", allIds);
+            const hasDafutier0 = has("dafutier0", allIds);
+            const hasDafutier1 = has("dafutier1", allIds);
 
             function buildLoadouts() {
                 const out = [];
