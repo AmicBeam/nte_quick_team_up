@@ -406,6 +406,11 @@
                 const teammateCard = teamGrid.querySelector('.card[data-id="anhunquT1"]');
                 if (teammateCard) teammateCard.classList.remove("selected");
             }
+            if (selectedMain.id === "bohe" && selectedTeam.has("boheT")) {
+                selectedTeam.delete("boheT");
+                const teammateCard = teamGrid.querySelector('.card[data-id="boheT"]');
+                if (teammateCard) teammateCard.classList.remove("selected");
+            }
             updateSummary();
         }
 
@@ -421,6 +426,10 @@
                 }
                 if (id === "anhunquT1" && selectedMain && (selectedMain.id === "anhunqu0" || selectedMain.id === "anhunqu1")) {
                     hintText.textContent = "安魂曲主C时不可选择安魂曲队友";
+                    return;
+                }
+                if (id === "boheT" && selectedMain && selectedMain.id === "bohe") {
+                    hintText.textContent = "薄荷主C时不可选择薄荷队友";
                     return;
                 }
                 if (id === "dafutier0" && selectedTeam.has("dafutier1")) {
@@ -441,16 +450,9 @@
             return allIds.includes(id);
         }
 
-        function computeZhujueMode(allIds, mainId) {
-            if (!has("zhujue", allIds)) return "none";
-            const nanaliOrJiuyuan = has("nanali", allIds) || has("jiuyuan", allIds);
-            if (nanaliOrJiuyuan) return "mastery";
-            if (mainId === "xiaozhi" && has("bohe", allIds)) return "mastery";
-            return "direct";
-        }
-
-        function basePersonalDamage(id, zhujueMode) {
+        function basePersonalDamage(id) {
             if (id === "bohe") return 1.0;
+            if (id === "boheT") return 0.15;
             if (id === "yi") return 1.0 / 1.2;
             if (id === "baicang") return 1.6 / 1.2;
             if (id === "nanali") return 1.2;
@@ -468,7 +470,7 @@
             if (id === "fatiya") return 0.2;
             if (id === "aidejia") return 0.0;
             if (id === "haniya") return 0.1;
-            if (id === "zhujue") return zhujueMode === "mastery" ? 0.3 : 0.5;
+            if (id === "zhujue") return 0.5;
             return 0.0;
         }
 
@@ -495,58 +497,80 @@
             if (unique.size !== 4) return null;
 
             const creationCountTotal = scenario.creationCountBase + scenario.creationCountNoMasteryDouble;
-            const zhujueMode = computeZhujueMode(allIds, mainId);
             const layers = computeLayers(allIds);
             const atkBonus = computeAtkBonus(allIds, scenario.anxingCount, mainId);
             const teamHasElem = (elem) => teamIds.some(id => elemMap[id] === elem);
             const jinranActive = (mainId === "yi") && teamHasElem("魂");
             const yingxuActive = (mainId === "yi") && has("zhujue", allIds) && has("jiuyuan", allIds);
 
-            let qingxianDamage = 0.4;
-            const hasDafutier0 = has("dafutier0", allIds);
-            const hasDafutier1 = has("dafutier1", allIds);
-            if (hasDafutier1) qingxianDamage *= 1.5;
-            if (hasDafutier0) qingxianDamage *= 1.25;
-            if (mainId === "xiaozhi" && hasDafutier0) qingxianDamage *= 1.15;
-            const baseQingxianDamage = qingxianDamage;
+            function buildLoadouts() {
+                const out = [];
+                const ids = allIds.filter((id) => id);
+                const optionIds = [...ids];
+                const optionsById = Object.fromEntries(optionIds.map((id) => [id, ["direct", "mastery", "qingxian"]]));
 
-            const masteryProviders = has("anhunquT1", allIds) ? ["anhunquT1"] : [null];
-            if (zhujueMode === "mastery" && has("zhujue", allIds)) masteryProviders.push("zhujue");
-            if (has("zaowu", allIds)) masteryProviders.push("zaowu");
-            // if (has("adele", allIds)) masteryProviders.push("adele");
-            if (has("haniya", allIds)) masteryProviders.push("haniya");
-            if (has("fatiya", allIds)) masteryProviders.push("fatiya");
-            if (has("aidejia", allIds)) masteryProviders.push("aidejia");
-
-            function reactionBoost(providerId) {
-                let creation = 1;
-                let zhuoran = 1;
-                let anxing = 1;
-
-                if (providerId === "zhujue") {
-                    creation = 1.9;
-                } else if (providerId === "aidejia") {
-                    creation = 1.9;
-                } else if (providerId === "haniya" || providerId === "fatiya") {
-                    anxing = 1.9;
-                } else if (providerId === "zaowu" || providerId === "adele") {
-                    zhuoran = 1.75;
-                } else if (providerId === "anhunquT1") {
-                    zhuoran = 1.9;
-                    anxing = 1.9;
+                function backtrack(idx, buildById) {
+                    if (idx >= optionIds.length) {
+                        const finalBuildById = { ...buildById };
+                        const masterySet = new Set();
+                        const qingxianSet = new Set();
+                        for (const id of ids) {
+                            const b = finalBuildById[id] || "direct";
+                            if (b === "mastery") masterySet.add(id);
+                            if (b === "qingxian") qingxianSet.add(id);
+                        }
+                        out.push({ buildById: finalBuildById, masterySet, qingxianSet });
+                        return;
+                    }
+                    const id = optionIds[idx];
+                    for (const b of optionsById[id]) {
+                        buildById[id] = b;
+                        backtrack(idx + 1, buildById);
+                    }
+                    delete buildById[id];
                 }
 
-                return { creation, zhuoran, anxing };
+                backtrack(0, {});
+                return out;
             }
 
-            function computePersonal(zhuoranCount, masteryProviderId) {
+            function reactionProviderMult(type, providerId, masterySet) {
+                if (!providerId) return 1;
+                const providerElem = elemMap[providerId];
+                let mult = 1;
+                for (const masteryId of masterySet) {
+                    const masteryElem = elemMap[masteryId];
+                    if (type === "creation") {
+                        if (masteryElem === "灵" && (providerId === masteryId || providerElem === "光")) mult = Math.max(mult, 1.75);
+                        if (masteryElem === "光" && (providerId === masteryId || providerElem === "灵")) mult = Math.max(mult, 1.9);
+                    } else if (type === "zhuoran") {
+                        if (masteryElem === "咒" && (providerId === masteryId || providerElem === "暗")) mult = Math.max(mult, 1.75);
+                        if (masteryElem === "暗" && (providerId === masteryId || providerElem === "咒")) mult = Math.max(mult, 1.9);
+                    } else if (type === "anxing") {
+                        if (masteryElem === "暗" && (providerId === masteryId || providerElem === "魂")) mult = Math.max(mult, 1.9);
+                        if (masteryElem === "魂" && (providerId === masteryId || providerElem === "暗")) mult = Math.max(mult, 1.9);
+                    }
+                }
+                return mult;
+            }
+
+            function computePersonal(zhuoranCount, loadout) {
                 const zhuoranLayerBoost = zhuoranCount > 0 ? (1 + layers * 0.25) : 1;
                 const adeleLayerBoost = zhuoranCount > 0 ? (1 + layers * 0.08) : 1;
                 const anhunquLayerBoost = zhuoranCount > 0 ? (1 + layers * 0.07) : 1;
+                const masterySet = loadout.masterySet;
+                const hasLingMastery = Array.from(masterySet).some(id => elemMap[id] === "灵");
+                const hasZhouMastery = Array.from(masterySet).some(id => elemMap[id] === "咒");
+                const hasHunMastery = Array.from(masterySet).some(id => elemMap[id] === "魂");
+                const hasXiangMastery = Array.from(masterySet).some(id => elemMap[id] === "相");
+                const hasElem = (elem) => allIds.some(id => elemMap[id] === elem);
+                const fuwenMult = (scenario.fuwenCount > 0 && hasElem("灵") && hasElem("咒") && (hasLingMastery || hasZhouMastery)) ? 1.30 : 1.20;
+                const jinranMult = (jinranActive && hasElem("魂") && hasElem("相") && (hasHunMastery || hasXiangMastery)) ? 1.30 : 1.20;
+                const qingxianSet = loadout.qingxianSet;
                 let personalSum = 0;
                 const characterDamage = {};
                 for (const id of allIds) {
-                    let dmg = basePersonalDamage(id, zhujueMode);
+                    let dmg = basePersonalDamage(id);
                     if (id === "jiuyuan" && creationCountTotal === 0) dmg = 0.6;
                     if (id === "dafutier0" && mainId === "xiaozhi") dmg *= 0.8;
 
@@ -554,9 +578,9 @@
                     if (has("adele", allIds) && elem === "咒") dmg *= 1.05;
 
                     const fuwenEligible = (elem === "灵" || elem === "咒");
-                    if (scenario.fuwenCount > 0 && fuwenEligible) dmg *= 1.20;
+                    if (scenario.fuwenCount > 0 && fuwenEligible) dmg *= fuwenMult;
 
-                    if (jinranActive && (elem === "魂" || elem === "相")) dmg *= 1.30;
+                    if (jinranActive && (elem === "魂" || elem === "相")) dmg *= jinranMult;
                     if (mainId === "yi" && elem === "相") dmg *= 1.06;
                     if (yingxuActive && id === "hasuoer") dmg *= 2.00;
 
@@ -573,10 +597,7 @@
                         dmg *= 0.5;
                     }
 
-                    const isMasteryBuild = (id === "anhunquT1") || (masteryProviderId && masteryProviderId !== "zhujue" && id === masteryProviderId);
-                    if (isMasteryBuild) {
-                        dmg *= 0.6;
-                    }
+                    if (loadout.buildById?.[id] && loadout.buildById[id] !== "direct") dmg *= 0.6;
 
                     characterDamage[id] = dmg;
                     personalSum += dmg;
@@ -594,28 +615,51 @@
             const baseAnxingCount = scenario.anxingCount;
             const baseCreationTotal = baseCreationCountBase + baseCreationCountNoMasteryDouble;
 
-            function buildResult(creationCountBase, creationCountNoMasteryDouble, zhuoranCount, anxingCount, masteryProviderId) {
-                const personal = computePersonal(zhuoranCount, masteryProviderId);
-                const boost = reactionBoost(masteryProviderId);
-                const creationBasePart = creationCountBase * 0.15;
-                const creationExtraPart = creationCountNoMasteryDouble * 0.15;
-                const creationDamage = (creationBasePart + creationExtraPart) * creationMult;
+            function buildResult(creationCountBase, creationCountNoMasteryDouble, zhuoranCount, anxingCount, loadout) {
+                const personal = computePersonal(zhuoranCount, loadout);
+                const masterySet = loadout.masterySet;
 
-                const cappedZhuoranCount = Math.min(zhuoranCount, 1);
-                let creationFinal = creationDamage * boost.creation;
-                let zhuoranDamage = cappedZhuoranCount * 0.2 * personal.zhuoranLayerBoost * boost.zhuoran;
-                let anxingDamage = anxingCount * 0.3 * boost.anxing;
+                const zhujueBaseCount = allIds.includes("zhujue") ? Math.min(1, creationCountBase) : 0;
+                const mainBaseCount = Math.max(0, creationCountBase - zhujueBaseCount);
+                const creationProviderParts = [];
+                if (zhujueBaseCount > 0) creationProviderParts.push({ id: "zhujue", count: zhujueBaseCount });
+                const mainCreationCount = mainBaseCount + creationCountNoMasteryDouble;
+                if (mainCreationCount > 0) creationProviderParts.push({ id: mainId, count: mainCreationCount });
 
-                if (has("adele", allIds) && cappedZhuoranCount > 0) {
+                let creationFinal = 0;
+                for (const p of creationProviderParts) {
+                    const part = p.count * 0.15 * creationMult;
+                    creationFinal += part * reactionProviderMult("creation", p.id, masterySet);
+                }
+
+                const zhuoranProviderId = (zhuoranCount > 0 && (mainId === "baicang" || mainId === "anhunqu0" || mainId === "anhunqu1")) ? mainId
+                    : (zhuoranCount > 0 && allIds.includes("anhunquT1") ? "anhunquT1" : mainId);
+                const cappedZhuoranTotal = Math.min(zhuoranCount, 1);
+                let zhuoranDamage = cappedZhuoranTotal * 0.2 * personal.zhuoranLayerBoost * reactionProviderMult("zhuoran", zhuoranProviderId, masterySet);
+
+                const anxingProviderId = (anxingCount > 0 && (mainId === "anhunqu0" || mainId === "anhunqu1")) ? mainId
+                    : (anxingCount > 0 && allIds.includes("anhunquT1") ? "anhunquT1" : mainId);
+                let anxingDamage = anxingCount * 0.3 * reactionProviderMult("anxing", anxingProviderId, masterySet);
+
+                if (has("adele", allIds) && cappedZhuoranTotal > 0) {
                     const adlerBoost = (mainId === "baicang" && (hasDafutier0 || hasDafutier1)) ? 1.06 : 1.03;
                     creationFinal *= adlerBoost;
                     zhuoranDamage *= adlerBoost;
                     anxingDamage *= adlerBoost;
                 }
 
-                let shixieCount = (cappedZhuoranCount > 0 && anxingCount > 0) ? (cappedZhuoranCount * anxingCount) : 0;
+                let shixieCount = (cappedZhuoranTotal > 0 && anxingCount > 0) ? (cappedZhuoranTotal * anxingCount) : 0;
                 if (has("baicang", allIds)) {
                     shixieCount *= 2;
+                }
+                let baseQingxianDamage = 0.4;
+                baseQingxianDamage += loadout.qingxianSet.size * 0.075;
+                const dafutierId = allIds.includes("dafutier1") ? "dafutier1" : (allIds.includes("dafutier0") ? "dafutier0" : null);
+                if (dafutierId) {
+                    const dafutierIsQingxian = loadout.buildById?.[dafutierId] === "qingxian";
+                    const x = dafutierIsQingxian ? 0.05 : 0.035;
+                    const extra = (dafutierId === "dafutier1") ? (4 * x) : ((mainId === "xiaozhi") ? x : (2 * x));
+                    baseQingxianDamage += extra;
                 }
                 const finalQingxianDamage = baseQingxianDamage * (1 + 0.3 * shixieCount);
 
@@ -635,7 +679,8 @@
                     zhuoranDamage,
                     anxingDamage,
                     qingxianDamage: finalQingxianDamage,
-                    notes
+                    notes,
+                    buildById: loadout.buildById
                 };
             }
 
@@ -653,9 +698,10 @@
             }
 
             let best = null;
+            const loadouts = buildLoadouts();
             for (const c of candidates) {
-                for (const providerId of masteryProviders) {
-                    const r = buildResult(c.cBase, c.cExtra, c.z, c.a, providerId);
+                for (const loadout of loadouts) {
+                    const r = buildResult(c.cBase, c.cExtra, c.z, c.a, loadout);
                     if (!best || r.total > best.total) best = r;
                 }
             }
@@ -787,7 +833,24 @@
             if (result.notes && result.notes.length > 0) {
                 extra = `（触发${result.notes.join("、")}）`;
             }
-            breakdown.textContent = parts.join(" · ") + extra;
+            breakdown.replaceChildren();
+            const line1 = document.createElement("div");
+            line1.textContent = parts.join(" · ") + extra;
+            breakdown.appendChild(line1);
+
+            const buildLabel = { direct: "直伤", mastery: "精通", qingxian: "倾陷" };
+            const buildParts = [];
+            for (const id of orderedIds) {
+                const b = result.buildById?.[id];
+                if (!b || b === "direct") continue;
+                const name = nameMap[id] || id;
+                buildParts.push(`${name} ${buildLabel[b] || b}`);
+            }
+            if (buildParts.length > 0) {
+                const line2 = document.createElement("div");
+                line2.textContent = `配装：${buildParts.join(" · ")}`;
+                breakdown.appendChild(line2);
+            }
 
             const surviveIds = new Set(["baicang", "jiuyuan", "aidejia", "adele", "fatiya"]);
             const pickedSurvive = orderedIds.filter(id => surviveIds.has(id));
