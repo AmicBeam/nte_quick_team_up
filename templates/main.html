@@ -614,15 +614,19 @@
             const baseAnxingCount = scenario.anxingCount;
             const baseCreationTotal = baseCreationCountBase + baseCreationCountNoMasteryDouble;
 
-            function buildResult(creationCountBase, creationCountNoMasteryDouble, zhuoranCount, anxingCount, loadout) {
-                const personal = computePersonal(zhuoranCount, loadout);
+            function buildResult(c, loadout) {
+                const personal = computePersonal(c.z, loadout);
                 const masterySet = loadout.masterySet;
 
-                const zhujueBaseCount = allIds.includes("zhujue") ? Math.min(1, creationCountBase) : 0;
-                const mainBaseCount = Math.max(0, creationCountBase - zhujueBaseCount);
+                let zhujueBaseCount = allIds.includes("zhujue") ? Math.min(1, c.cBase) : 0;
+                let mainBaseCount = Math.max(0, c.cBase - zhujueBaseCount);
+                let mainCreationCount = mainBaseCount + c.cExtra;
+                if (c.xunBoost?.type === "creation") {
+                    if (c.xunBoost.providerId === "zhujue") zhujueBaseCount += 0.5;
+                    if (c.xunBoost.providerId === mainId) mainCreationCount += 0.5;
+                }
                 const creationProviderParts = [];
                 if (zhujueBaseCount > 0) creationProviderParts.push({ id: "zhujue", count: zhujueBaseCount });
-                const mainCreationCount = mainBaseCount + creationCountNoMasteryDouble;
                 if (mainCreationCount > 0) creationProviderParts.push({ id: mainId, count: mainCreationCount });
 
                 let creationFinal = 0;
@@ -631,13 +635,17 @@
                     creationFinal += part * reactionProviderMult("creation", p.id, masterySet);
                 }
 
-                const zhuoranProviderId = (zhuoranCount > 0 && (mainId === "baicang" || mainId === "anhunqu0" || mainId === "anhunqu1")) ? mainId
-                    : (zhuoranCount > 0 && allIds.includes("anhunquT1") ? "anhunquT1" : mainId);
-                const cappedZhuoranTotal = Math.min(zhuoranCount, 1);
+                const zhuoranProviderId = (c.z > 0 && (mainId === "baicang" || mainId === "anhunqu0" || mainId === "anhunqu1")) ? mainId
+                    : (c.z > 0 && allIds.includes("anhunquT1") ? "anhunquT1" : mainId);
+                const cappedZhuoranTotal = Math.min(c.z, 1);
                 let zhuoranDamage = cappedZhuoranTotal * 0.2 * personal.zhuoranLayerBoost * reactionProviderMult("zhuoran", zhuoranProviderId, masterySet);
 
-                const anxingProviderId = (anxingCount > 0 && (mainId === "anhunqu0" || mainId === "anhunqu1")) ? mainId
-                    : (anxingCount > 0 && allIds.includes("anhunquT1") ? "anhunquT1" : mainId);
+                const anxingProviderId = (c.a > 0 && (mainId === "anhunqu0" || mainId === "anhunqu1")) ? mainId
+                    : (c.a > 0 && allIds.includes("anhunquT1") ? "anhunquT1" : mainId);
+                let anxingCount = c.a;
+                if (c.xunBoost?.type === "anxing" && c.xunBoost.providerId === anxingProviderId) {
+                    anxingCount += 0.5;
+                }
                 let anxingDamage = anxingCount * 0.3 * reactionProviderMult("anxing", anxingProviderId, masterySet);
 
                 if (has("adele", allIds) && cappedZhuoranTotal > 0) {
@@ -684,15 +692,19 @@
             }
 
             const hasXun = has("xun", allIds);
-            const candidates = [{ cBase: baseCreationCountBase, cExtra: baseCreationCountNoMasteryDouble, z: baseZhuoranCount, a: baseAnxingCount }];
-            if (hasXun && (baseCreationTotal > 0 || baseAnxingCount > 0)) {
-                if (baseCreationTotal > 0) {
-                    const boostedTotal = Math.min(baseCreationTotal * 1.5, 3);
-                    const factor = boostedTotal / baseCreationTotal;
-                    candidates.push({ cBase: baseCreationCountBase * factor, cExtra: baseCreationCountNoMasteryDouble * factor, z: baseZhuoranCount, a: baseAnxingCount });
+            const baseCandidate = { cBase: baseCreationCountBase, cExtra: baseCreationCountNoMasteryDouble, z: baseZhuoranCount, a: baseAnxingCount, xunBoost: null };
+            const candidates = [baseCandidate];
+            if (hasXun) {
+                if (baseCreationTotal > 0 && baseCreationTotal <= 3) {
+                    const zhujueCount0 = allIds.includes("zhujue") ? Math.min(1, baseCreationCountBase) : 0;
+                    const mainCount0 = Math.max(0, baseCreationCountBase - zhujueCount0) + baseCreationCountNoMasteryDouble;
+                    if (zhujueCount0 > 0) candidates.push({ ...baseCandidate, xunBoost: { type: "creation", providerId: "zhujue" } });
+                    if (mainCount0 > 0) candidates.push({ ...baseCandidate, xunBoost: { type: "creation", providerId: mainId } });
                 }
                 if (baseAnxingCount > 0) {
-                    candidates.push({ cBase: baseCreationCountBase, cExtra: baseCreationCountNoMasteryDouble, z: baseZhuoranCount, a: baseAnxingCount * 1.5 });
+                    const anxingProviderId0 = (baseAnxingCount > 0 && (mainId === "anhunqu0" || mainId === "anhunqu1")) ? mainId
+                        : (baseAnxingCount > 0 && allIds.includes("anhunquT1") ? "anhunquT1" : mainId);
+                    candidates.push({ ...baseCandidate, xunBoost: { type: "anxing", providerId: anxingProviderId0 } });
                 }
             }
 
@@ -700,7 +712,7 @@
             const loadouts = buildLoadouts();
             for (const c of candidates) {
                 for (const loadout of loadouts) {
-                    const r = buildResult(c.cBase, c.cExtra, c.z, c.a, loadout);
+                    const r = buildResult(c, loadout);
                     if (!best || r.total > best.total) best = r;
                 }
             }
