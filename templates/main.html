@@ -572,7 +572,6 @@
                 for (const id of allIds) {
                     let dmg = basePersonalDamage(id);
                     if (id === "jiuyuan" && creationCountTotal === 0) dmg = 0.6;
-                    if (id === "dafutier0" && mainId === "xiaozhi") dmg *= 0.8;
 
                     const elem = elemMap[id];
                     if (has("adele", allIds) && elem === "咒") dmg *= 1.05;
@@ -593,7 +592,7 @@
                     if (id === "adele") dmg *= adeleLayerBoost;
                     if (id === "anhunqu0" || id === "anhunqu1" || id === "anhunquT1") dmg *= anhunquLayerBoost;
 
-                    if (mainId === "xiaozhi" && (id === "zhujue" || id === "hasuoer" || id === "adele" || id === "zaowu" || id === "haniya")) {
+                    if (mainId === "xiaozhi" && (id === "zhujue" || id === "hasuoer" || id === "adele" || id === "zaowu" || id === "haniya" || id === "dafutier0")) {
                         dmg *= 0.5;
                     }
 
