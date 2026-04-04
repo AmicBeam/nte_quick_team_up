@@ -876,7 +876,7 @@
                 breakdown.appendChild(line2);
             }
 
-            const surviveIds = new Set(["baicang", "jiuyuan", "aidejia", "adele", "fatiya"]);
+            const surviveIds = new Set(["jiuyuan", "aidejia", "adele", "fatiya"]);
             const pickedSurvive = orderedIds.filter(id => surviveIds.has(id));
             if (pickedSurvive.length === 0) {
                 surviveWarning.textContent = "请注意：该配队缺少生存能力";
