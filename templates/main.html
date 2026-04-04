@@ -412,6 +412,11 @@
                 const teammateCard = teamGrid.querySelector('.card[data-id="boheT"]');
                 if (teammateCard) teammateCard.classList.remove("selected");
             }
+            if (selectedMain.id === "nanali" && selectedTeam.has("nanaliT")) {
+                selectedTeam.delete("nanaliT");
+                const teammateCard = teamGrid.querySelector('.card[data-id="nanaliT"]');
+                if (teammateCard) teammateCard.classList.remove("selected");
+            }
             updateSummary();
         }
 
@@ -431,6 +436,10 @@
                 }
                 if (id === "boheT" && selectedMain && selectedMain.id === "bohe") {
                     hintText.textContent = "薄荷主C时不可选择薄荷队友";
+                    return;
+                }
+                if (id === "nanaliT" && selectedMain && selectedMain.id === "nanali") {
+                    hintText.textContent = "娜娜莉主C时不可选择娜娜莉队友";
                     return;
                 }
                 if (id === "dafutier0" && selectedTeam.has("dafutier1")) {
@@ -454,6 +463,7 @@
         function basePersonalDamage(id) {
             if (id === "bohe") return 1.0;
             if (id === "boheT") return 0.15;
+            if (id === "nanaliT") return 0.3;
             if (id === "yi") return 1.0 / 1.2;
             if (id === "baicang") return 1.6 / 1.2;
             if (id === "nanali") return 1.2;
@@ -593,7 +603,7 @@
                     if (id === "adele") dmg *= adeleLayerBoost;
                     if (id === "anhunqu0" || id === "anhunqu1" || id === "anhunquT1") dmg *= anhunquLayerBoost;
 
-                    if (mainId === "xiaozhi" && (id === "zhujue" || id === "hasuoer" || id === "adele" || id === "zaowu" || id === "haniya" || id === "dafutier0")) {
+                    if (mainId === "xiaozhi" && (id === "zhujue" || id === "hasuoer" || id === "adele" || id === "zaowu" || id === "haniya" || id === "dafutier0" || id === "nanaliT")) {
                         dmg *= 0.5;
                     }
 
@@ -605,7 +615,7 @@
                 return { personalSum, characterDamage, zhuoranLayerBoost };
             }
 
-            const creationMultNanali = has("nanali", allIds) ? 2 : 1;
+            const creationMultNanali = (has("nanali", allIds) || has("nanaliT", allIds)) ? 2 : 1;
             const creationMultJiuyuan = has("jiuyuan", allIds) ? 2 : 1;
             const creationMult = creationMultNanali * creationMultJiuyuan;
 

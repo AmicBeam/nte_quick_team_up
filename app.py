@@ -26,6 +26,7 @@ TEAMMATES = [
     {"id": "aidejia", "name": "埃德嘉", "image": "埃德嘉.png", "elem": "光"},
     {"id": "jiuyuan", "name": "九原", "image": "九原.png", "elem": "灵"},
     {"id": "boheT", "name": "薄荷", "image": "薄荷.png", "elem": "灵"},
+    {"id": "nanaliT", "name": "娜娜莉", "image": "娜娜莉.png", "elem": "灵"},
     {"id": "zaowu", "name": "早雾", "image": "早雾.png", "elem": "咒"},
     {"id": "adele", "name": "阿德勒", "image": "阿德勒.png", "elem": "咒"},
     {"id": "anhunquT1", "name": "安魂曲（1觉）", "image": "安魂曲.png", "elem": "暗"},
