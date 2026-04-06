@@ -789,11 +789,11 @@
 
             if (mainId === "baicang") {
                 const sA = { ...baseScenario };
-                if (teamHasElem("暗")) sA.zhuoranCount = 1;
+                if (teamHasElem("暗")) sA.zhuoranCount = 0.5;
                 const tA = pickBestFromScenarios(applyAnhunquTeammateScenarioVariants(sA));
 
                 const sB = { ...baseScenario };
-                if (teamHasElem("灵")) sB.fuwenCount = 1;
+                if (teamHasElem("灵")) sB.fuwenCount = 0.5;
                 const tB = pickBestFromScenarios(applyAnhunquTeammateScenarioVariants(sB));
 
                 if (!tA) return tB;
