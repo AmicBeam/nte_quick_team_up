@@ -295,12 +295,12 @@
                 <div class="hero-note">角色为80级，天赋10级；敌人为82级、20全抗、无红圈会攻击的站桩BOSS。</div>
                 <div class="hero-note">S级默认0觉，A级默认满觉，小吱2觉。</div>
                 <div class="hero-note">未考虑轴长不同步问题，会有一些出入；仅供娱乐，请以实战为主。</div>
-                <div class="hero-note">盾徽图标表示角色可以提供生存能力，其中九原需要激活1觉；注意主角的环合天赋奶量太低，不值得纳入考虑。</div>
+                <div class="hero-note">盾徽图标表示角色可以提供生存能力；</div>
                 <div class="hero-note">关注B站 <a href="https://space.bilibili.com/9412490" target="_blank" rel="noreferrer">静默之光</a>。</div>
             </div>
         </div>
 
-        {% set survive_ids = ["jiuyuan", "aidejia", "adele", "fatiya"] %}
+        {% set survive_ids = ["aidejia", "adele", "fatiya"] %}
         <div class="glass section">
             <h2>选择主C</h2>
             <div class="grid" id="mainGrid">
@@ -467,14 +467,14 @@
             if (id === "yi") return 0.8 / 1.2;
             if (id === "baicang") return 1.4 / 1.2;
             if (id === "nanali") return 1.2;
-            if (id === "xiaozhi") return 3.0;
+            if (id === "xiaozhi") return 1.6;
             if (id === "anhunqu1") return 1.6;
             if (id === "anhunqu0") return 1.6;
             if (id === "jiuyuan") return 0.8;
             if (id === "xun") return 0.6;
             if (id === "anhunquT1") return 0.2;
-            if (id === "dafutier1") return 0.7;
-            if (id === "dafutier0") return 0.4;
+            if (id === "dafutier1") return 0.9;
+            if (id === "dafutier0") return 0.5;
             if (id === "hasuoer") return 0.4 / 1.8;
             if (id === "adele") return 0.2;
             if (id === "zaowu") return 0.2;
@@ -604,10 +604,6 @@
 
                     if (id === "adele") dmg *= adeleLayerBoost;
                     if (id === "anhunqu0" || id === "anhunqu1" || id === "anhunquT1") dmg *= anhunquLayerBoost;
-
-                    if (mainId === "xiaozhi" && (id === "zhujue" || id === "hasuoer" || id === "adele" || id === "zaowu" || id === "haniya" || id === "dafutier0" || id === "nanaliT")) {
-                        dmg *= 0.5;
-                    }
 
                     if (loadout.buildById?.[id] && loadout.buildById[id] !== "direct") dmg *= 0.6;
 
@@ -876,12 +872,10 @@
                 breakdown.appendChild(line2);
             }
 
-            const surviveIds = new Set(["jiuyuan", "aidejia", "adele", "fatiya"]);
+            const surviveIds = new Set(["aidejia", "adele", "fatiya"]);
             const pickedSurvive = orderedIds.filter(id => surviveIds.has(id));
             if (pickedSurvive.length === 0) {
                 surviveWarning.textContent = "请注意：该配队缺少生存能力";
-            } else if (pickedSurvive.length === 1 && pickedSurvive[0] === "jiuyuan") {
-                surviveWarning.textContent = "注意：需要九原激活1觉提供生存能力";
             } else {
                 surviveWarning.textContent = "";
             }
