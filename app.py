@@ -1,14 +1,19 @@
 # SPDX-License-Identifier: GPL-3.0-only
 # Copyright (C) 2025 AmicBeam
-from flask import Flask, render_template, request, send_from_directory
+import json
 import random
+import subprocess
 from pathlib import Path
+
+from flask import Flask, jsonify, render_template, request, send_from_directory
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.jinja_env.auto_reload = True
 
 STATIC_DIR = Path(app.root_path) / "static"
+WORKBOOK_PATH = STATIC_DIR / "workbooks" / "异环云配队.xlsx"
+CALCULATE_SCRIPT = Path(app.root_path) / "scripts" / "cloud_team_calculate.mjs"
 
 MAIN_CANDIDATES = [
     {"id": "bohe", "name": "薄荷", "image": "薄荷.png", "elem": "灵"},
@@ -79,6 +84,36 @@ def cloud_avatar():
         if (STATIC_DIR / cand).exists():
             return send_from_directory(STATIC_DIR, cand)
     return send_from_directory(STATIC_DIR, "单位.jpg")
+
+@app.route("/api/cloud-team/calculate", methods=["POST"])
+def cloud_team_calculate():
+    payload = request.get_json(silent=True)
+    if payload is None:
+        return jsonify({"error": "Request body must be valid JSON"}), 400
+    if not WORKBOOK_PATH.exists():
+        return jsonify({"error": f"Workbook not found: {WORKBOOK_PATH}"}), 503
+
+    proc = subprocess.run(
+        ["node", str(CALCULATE_SCRIPT)],
+        input=json.dumps(payload, ensure_ascii=False),
+        text=True,
+        capture_output=True,
+        cwd=app.root_path,
+    )
+    if proc.returncode != 0:
+        return jsonify({
+            "error": "Failed to calculate cloud team results",
+            "detail": (proc.stderr or proc.stdout or "").strip(),
+        }), 500
+
+    try:
+        result = json.loads(proc.stdout)
+    except json.JSONDecodeError:
+        return jsonify({
+            "error": "Calculation returned invalid JSON",
+            "detail": proc.stdout.strip()[:2000],
+        }), 500
+    return jsonify(result)
 
 # 启动Flask应用
 if __name__ == '__main__':

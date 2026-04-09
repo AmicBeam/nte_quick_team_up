@@ -40,10 +40,23 @@
    return XLSX.utils.decode_range(ref);
  }
  
- function encodeRange(range) {
-   const XLSX = assertGlobal("XLSX");
-   return XLSX.utils.encode_range(range);
- }
+function encodeRange(range) {
+  const XLSX = assertGlobal("XLSX");
+  return XLSX.utils.encode_range(range);
+}
+
+function serializeCellValue(v) {
+  if (v === undefined) return null;
+  if (v === null) return null;
+  if (typeof v === "number") return Number.isFinite(v) ? v : null;
+  if (typeof v === "string" || typeof v === "boolean") return v;
+  if (v instanceof Date) return v.toISOString();
+  if (typeof v === "object") {
+    if (typeof v.value === "string") return v.value;
+    if (typeof v.message === "string") return v.message;
+  }
+  return String(v);
+}
  
  function normalizeFormula(f) {
    if (!f) return f;
@@ -638,6 +651,35 @@ export class CloudWorkbook {
     const p = b.extra?.[label];
     if (!p) return null;
     return this.hf.getCellValue({ sheet: this.sheetIdByName.get("云配队"), row: p.row, col: p.col });
+  }
+
+  exportResults() {
+    const roles = [];
+    for (let i = 0; i < 4; i++) {
+      const name = String(this.getValue("云配队", `F${4 + i}`) ?? "").trim() || `角色${i + 1}`;
+      roles.push({
+        slot: i + 1,
+        name,
+        damage: serializeCellValue(this.getTeamContribDamage(i)),
+        trap: serializeCellValue(this.getTeamContribTrap(i)),
+        energy: serializeCellValue(this.getTeamContribEnergy(i)),
+        ring: serializeCellValue(this.getTeamContribRing(i)),
+      });
+    }
+    const extraDamage = ["创生", "浊燃", "黯星", "倾陷"].map((label) => ({
+      label,
+      value: serializeCellValue(this.getExtraDamage(label)),
+    }));
+    return {
+      summary: {
+        dps: serializeCellValue(this.getTeamDps()),
+        totalDamage: serializeCellValue(this.getTeamTotalDamage()),
+        cumulativeTrap: serializeCellValue(this.getCumulativeTrap()),
+        cumulativeTime: serializeCellValue(this.getCumulativeTime()),
+      },
+      roles,
+      extraDamage,
+    };
   }
 
    exportState() {
