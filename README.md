@@ -2,6 +2,10 @@
 
 异环预配队 + 云配队（浏览器端计算/时间轴编辑）工具。
 
+### QQ 群
+
+- 1005485948
+
 ### 功能
 
 - 预配队：选择主C与队友，生成队伍评分
@@ -64,7 +68,3 @@ flask run --host 0.0.0.0 --port 5000
 ### License
 
 GPL-3.0-only，详见 [LICENSE](file:///Users/bytedance/projects/nte_quick_team_up/LICENSE)。
-
-### QQ 群
-
-- 1005485948
