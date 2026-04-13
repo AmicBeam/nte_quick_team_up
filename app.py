@@ -20,6 +20,7 @@ MAIN_CANDIDATES = [
     {"id": "yi", "name": "翳", "image": "翳.png", "elem": "相"},
     {"id": "baicang", "name": "白藏", "image": "白藏.png", "elem": "咒"},
     {"id": "nanali", "name": "娜娜莉", "image": "娜娜莉.png", "elem": "灵"},
+    {"id": "jiuyuanM", "name": "九原", "image": "九原.png", "elem": "灵"},
     {"id": "xiaozhi", "name": "小吱", "image": "小吱.png", "elem": "光"},
     {"id": "anhunqu0", "name": "安魂曲（0觉）", "image": "安魂曲.png", "elem": "暗"},
     {"id": "anhunqu1", "name": "安魂曲（1觉）", "image": "安魂曲.png", "elem": "暗"},

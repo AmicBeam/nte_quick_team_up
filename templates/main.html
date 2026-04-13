@@ -417,6 +417,11 @@
                 const teammateCard = teamGrid.querySelector('.card[data-id="nanaliT"]');
                 if (teammateCard) teammateCard.classList.remove("selected");
             }
+            if (selectedMain.id === "jiuyuanM" && selectedTeam.has("jiuyuan")) {
+                selectedTeam.delete("jiuyuan");
+                const teammateCard = teamGrid.querySelector('.card[data-id="jiuyuan"]');
+                if (teammateCard) teammateCard.classList.remove("selected");
+            }
             updateSummary();
         }
 
@@ -442,6 +447,10 @@
                     hintText.textContent = "娜娜莉主C时不可选择娜娜莉队友";
                     return;
                 }
+                if (id === "jiuyuan" && selectedMain && selectedMain.id === "jiuyuanM") {
+                    hintText.textContent = "九原主C时不可选择九原队友";
+                    return;
+                }
                 if (id === "dafutier0" && selectedTeam.has("dafutier1")) {
                     hintText.textContent = "达芙蒂尔0觉与1觉不可同时上场";
                     return;
@@ -465,16 +474,17 @@
             if (id === "boheT") return 0.15;
             if (id === "nanaliT") return 0.3;
             if (id === "yi") return 0.8 / 1.2;
-            if (id === "baicang") return 1.4 / 1.2;
+            if (id === "baicang") return 1.5 / 1.2;
             if (id === "nanali") return 1.2;
-            if (id === "xiaozhi") return 1.6;
+            if (id === "xiaozhi") return 1.0;
             if (id === "anhunqu1") return 1.6;
             if (id === "anhunqu0") return 1.6;
+            if (id === "jiuyuanM") return 1.0;
             if (id === "jiuyuan") return 0.8;
-            if (id === "xun") return 0.6;
+            if (id === "xun") return 0.3;
             if (id === "anhunquT1") return 0.2;
-            if (id === "dafutier1") return 0.9;
-            if (id === "dafutier0") return 0.5;
+            if (id === "dafutier1") return 0.8 / 0.7;
+            if (id === "dafutier0") return 0.3 / 0.7;
             if (id === "hasuoer") return 0.4 / 1.8;
             if (id === "adele") return 0.2;
             if (id === "zaowu") return 0.2;
@@ -567,7 +577,7 @@
                 return mult;
             }
 
-            function computePersonal(zhuoranCount, loadout) {
+            function computePersonal(zhuoranCount, loadout, xunBoost) {
                 const zhuoranLayerBoost = zhuoranCount > 0 ? (1 + layers * 0.25) : 1;
                 const adeleLayerBoost = zhuoranCount > 0 ? (1 + layers * 0.08) : 1;
                 const anhunquLayerBoost = zhuoranCount > 0 ? (1 + layers * 0.07) : 1;
@@ -584,7 +594,6 @@
                 const characterDamage = {};
                 for (const id of allIds) {
                     let dmg = basePersonalDamage(id);
-                    if (id === "jiuyuan" && creationCountTotal === 0) dmg = 0.6;
 
                     const elem = elemMap[id];
                     if (has("adele", allIds) && elem === "咒") dmg *= 1.05;
@@ -605,7 +614,8 @@
                     if (id === "adele") dmg *= adeleLayerBoost;
                     if (id === "anhunqu0" || id === "anhunqu1" || id === "anhunquT1") dmg *= anhunquLayerBoost;
 
-                    if (loadout.buildById?.[id] && loadout.buildById[id] !== "direct") dmg *= 0.6;
+                    if (loadout.buildById?.[id] && loadout.buildById[id] !== "direct") dmg *= 0.7;
+                    if (xunBoost?.type === "self" && id === "xun") dmg *= 2.0;
 
                     characterDamage[id] = dmg;
                     personalSum += dmg;
@@ -614,7 +624,7 @@
             }
 
             const creationMultNanali = (has("nanali", allIds) || has("nanaliT", allIds)) ? 2 : 1;
-            const creationMultJiuyuan = has("jiuyuan", allIds) ? 2 : 1;
+            const creationMultJiuyuan = (has("jiuyuan", allIds) || has("jiuyuanM", allIds)) ? 2 : 1;
             const creationMult = creationMultNanali * creationMultJiuyuan;
 
             const baseCreationCountBase = scenario.creationCountBase;
@@ -624,7 +634,7 @@
             const baseCreationTotal = baseCreationCountBase + baseCreationCountNoMasteryDouble;
 
             function buildResult(c, loadout) {
-                const personal = computePersonal(c.z, loadout);
+                const personal = computePersonal(c.z, loadout, c.xunBoost);
                 const masterySet = loadout.masterySet;
 
                 let zhujueBaseCount = allIds.includes("zhujue") ? Math.min(1, c.cBase) : 0;
@@ -673,8 +683,7 @@
                 const dafutierId = allIds.includes("dafutier1") ? "dafutier1" : (allIds.includes("dafutier0") ? "dafutier0" : null);
                 if (dafutierId) {
                     const dafutierIsQingxian = loadout.buildById?.[dafutierId] === "qingxian";
-                    const x = dafutierIsQingxian ? 0.05 : 0.035;
-                    const extra = (dafutierId === "dafutier1") ? (4 * x) : ((mainId === "xiaozhi") ? x : (2 * x));
+                    const extra = dafutierIsQingxian ? 0.3 : 0.21;
                     baseQingxianDamage += extra;
                 }
                 const finalQingxianDamage = baseQingxianDamage * (1 + 0.3 * shixieCount);
@@ -704,6 +713,7 @@
             const baseCandidate = { cBase: baseCreationCountBase, cExtra: baseCreationCountNoMasteryDouble, z: baseZhuoranCount, a: baseAnxingCount, xunBoost: null };
             const candidates = [baseCandidate];
             if (hasXun) {
+                candidates.push({ ...baseCandidate, xunBoost: { type: "self" } });
                 if (baseCreationTotal > 0 && baseCreationTotal <= 3) {
                     const zhujueCount0 = allIds.includes("zhujue") ? Math.min(1, baseCreationCountBase) : 0;
                     const mainCount0 = Math.max(0, baseCreationCountBase - zhujueCount0) + baseCreationCountNoMasteryDouble;
@@ -764,18 +774,18 @@
             }
 
             if (mainId === "xiaozhi") {
-                const extra = teamHasElem("灵") ? 1 : 0;
+                const extra = teamHasElem("灵") ? 0.5 : 0;
                 const s = { ...baseScenario, creationCountNoMasteryDouble: extra };
                 return pickBestFromScenarios(applyAnhunquTeammateScenarioVariants(s));
             }
 
             if (mainId === "nanali" || mainId === "bohe") {
                 const sA = { ...baseScenario };
-                if (teamHasElem("光")) sA.creationCountBase += (mainId === "nanali" ? 0.5 : 1);
+                if (teamHasElem("光")) sA.creationCountBase += 0.5;
                 const tA = pickBestFromScenarios(applyAnhunquTeammateScenarioVariants(sA));
 
                 const sB = { ...baseScenario };
-                if (teamHasElem("咒")) sB.fuwenCount = 1;
+                if (teamHasElem("咒")) sB.fuwenCount = 0.5;
                 const tB = pickBestFromScenarios(applyAnhunquTeammateScenarioVariants(sB));
 
                 if (!tA) return tB;
@@ -801,19 +811,21 @@
                 const z = teamHasElem("咒") ? 1 : 0;
                 const a = teamHasElem("魂") ? 1 : 0;
 
-                const t0 = computeScenarioTotal(mainId, teamIds, { ...baseScenario });
-                const tZ = computeScenarioTotal(mainId, teamIds, { ...baseScenario, zhuoranCount: z });
-                const tA = computeScenarioTotal(mainId, teamIds, { ...baseScenario, anxingCount: a });
-                const tZA = computeScenarioTotal(mainId, teamIds, { ...baseScenario, zhuoranCount: z, anxingCount: a });
-
-                const ts = [t0, tZ, tA, tZA].filter(Boolean);
+                const scenarios = [
+                    { ...baseScenario },
+                    { ...baseScenario, zhuoranCount: z },
+                    { ...baseScenario, anxingCount: a ? 1.5 : 0 },
+                    { ...baseScenario, zhuoranCount: z, anxingCount: a ? 0.5 : 0 },
+                    { ...baseScenario, zhuoranCount: z ? 0.5 : 0, anxingCount: a },
+                ];
+                const ts = scenarios.map((s) => computeScenarioTotal(mainId, teamIds, s)).filter(Boolean);
                 if (ts.length === 0) return null;
                 return ts.reduce((best, cur) => (cur.total > best.total ? cur : best), ts[0]);
             }
 
             if (mainId === "anhunqu0") {
-                const z = teamHasElem("咒") ? 1 : 0;
-                const a = teamHasElem("魂") ? 1 : 0;
+                const z = teamHasElem("咒") ? 0.5 : 0;
+                const a = teamHasElem("魂") ? 0.5 : 0;
 
                 const t0 = computeScenarioTotal(mainId, teamIds, { ...baseScenario });
                 const tZ = computeScenarioTotal(mainId, teamIds, { ...baseScenario, zhuoranCount: z });
