@@ -538,6 +538,7 @@
             const atkBonus = computeAtkBonus(allIds, scenario.anxingCount, mainId);
             const teamHasElem = (elem) => teamIds.some(id => elemMap[id] === elem);
             const jinranActive = (mainId === "yi") && teamHasElem("魂");
+            const jinranCount = jinranActive ? (Number.isFinite(Number(scenario.jinranCount)) ? Number(scenario.jinranCount) : 1) : 0;
             const yingxuActive = (mainId === "yi") && has("zhujue", allIds) && has("jiuyuan", allIds);
             const hasDafutier0 = has("dafutier0", allIds);
             const hasDafutier1 = has("dafutier1", allIds);
@@ -603,8 +604,10 @@
                 const hasHunMastery = Array.from(masterySet).some(id => elemMap[id] === "魂");
                 const hasXiangMastery = Array.from(masterySet).some(id => elemMap[id] === "相");
                 const hasElem = (elem) => allIds.some(id => elemMap[id] === elem);
-                const fuwenMult = (scenario.fuwenCount > 0 && hasElem("灵") && hasElem("咒") && (hasLingMastery || hasZhouMastery)) ? 1.30 : 1.20;
-                const jinranMult = (jinranActive && hasElem("魂") && hasElem("相") && (hasHunMastery || hasXiangMastery)) ? 1.30 : 1.20;
+                const fuwenBaseMult = (hasElem("灵") && hasElem("咒") && (hasLingMastery || hasZhouMastery)) ? 1.30 : 1.20;
+                const fuwenMult = scenario.fuwenCount > 0 ? (1 + (fuwenBaseMult - 1) * scenario.fuwenCount) : 1;
+                const jinranBaseMult = (hasElem("魂") && hasElem("相") && (hasHunMastery || hasXiangMastery)) ? 1.30 : 1.20;
+                const jinranMult = jinranCount > 0 ? (1 + (jinranBaseMult - 1) * jinranCount) : 1;
                 const qingxianSet = loadout.qingxianSet;
                 let personalSum = 0;
                 const characterDamage = {};
@@ -617,7 +620,7 @@
                     const fuwenEligible = (elem === "灵" || elem === "咒");
                     if (scenario.fuwenCount > 0 && fuwenEligible) dmg *= fuwenMult;
 
-                    if (jinranActive && (elem === "魂" || elem === "相")) dmg *= jinranMult;
+                    if (jinranCount > 0 && (elem === "魂" || elem === "相")) dmg *= jinranMult;
                     if (mainId === "yi" && elem === "相") dmg *= 1.06;
                     if (yingxuActive && id === "hasuoer") dmg *= 2.00;
 
@@ -708,7 +711,7 @@
                 if (mainId === "baicang") total *= 1.05;
                 const notes = [];
                 if (scenario.fuwenCount > 0) notes.push("覆纹");
-                if (jinranActive) notes.push("浸染");
+                if (jinranCount > 0) notes.push("浸染");
                 if (yingxuActive) notes.push("盈蓄");
                 if (shixieCount > 0) notes.push("失谐");
 

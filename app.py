@@ -5,7 +5,7 @@ import random
 import subprocess
 from pathlib import Path
 
-from flask import Flask, jsonify, render_template, request, send_from_directory
+from flask import Flask, jsonify, redirect, render_template, request, send_from_directory
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -45,7 +45,7 @@ TEAMMATES = [
 
 @app.route("/")
 def home():
-    return preteam()
+    return redirect("/preteam", code=302)
 
 @app.route("/preteam")
 def preteam():
