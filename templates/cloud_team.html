@@ -6,6 +6,21 @@
    <link rel="icon" href="{{ url_for('static', filename='单位.jpg') }}">
    <title>异环云配队 - 主界面</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='cloud/cloud.css') }}?v=41" />
+  <style>
+    .icp {
+      margin-top: 18px;
+      text-align: center;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.55);
+    }
+    .icp a {
+      color: rgba(255, 255, 255, 0.65);
+      text-decoration: none;
+    }
+    .icp a:hover {
+      color: #ffffff;
+    }
+  </style>
    <script src="{{ url_for('static', filename='vendor/xlsx.full.min.js') }}"></script>
    <script src="{{ url_for('static', filename='vendor/hyperformula.full.min.js') }}"></script>
    <script src="{{ url_for('static', filename='vendor/echarts.min.js') }}"></script>
@@ -86,6 +101,9 @@
         </div>
         <div class="hint" id="gearStatus">正在加载表格…</div>
       </div>
+    </div>
+    <div class="icp">
+      <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">备案号：津ICP备2026003916号</a>
     </div>
    </div>
  
