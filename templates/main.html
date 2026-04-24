@@ -1222,6 +1222,7 @@
 
                 let total = personalSum + creationDamage + zhuoranDamage + anxingDamage + qingxianDamage;
                 if (mainId === "baicang") total *= 1.05;
+                if (targetMode === "aoe" && hasId("zaowu", allIds)) total *= 1.05;
                 const reactions = [];
                 if (delayCount > 0) reactions.push(`延滞 ${delayCount.toFixed(1)}次`);
                 if (creationCount > 0) reactions.push(`创生 ${creationDamage.toFixed(1)}分`);
@@ -1347,7 +1348,9 @@
             }
 
             const pickedSurvive = orderedIds.filter((id) => surviveIds.has(id));
-            if (pickedSurvive.length === 0) {
+            if (getCharacterKey(orderedIds[0]) === "hasuoer" && pickedSurvive.length < 2) {
+                surviveWarning.textContent = "哈索尔主C想要打满伤害，建议携带多名生存位";
+            } else if (pickedSurvive.length === 0) {
                 if (orderedIds.includes("zhujue") && (result.yingxuCount || 0) > 0) {
                     surviveWarning.textContent = "主角提供的生存能力较低，建议携带专职生存位";
                 } else {
