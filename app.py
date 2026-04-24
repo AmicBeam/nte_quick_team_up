@@ -16,31 +16,32 @@ WORKBOOK_PATH = STATIC_DIR / "workbooks" / "异环云配队.xlsx"
 CALCULATE_SCRIPT = Path(app.root_path) / "scripts" / "cloud_team_calculate.mjs"
 
 MAIN_CANDIDATES = [
-    {"id": "bohe", "name": "薄荷", "image": "薄荷.png", "elem": "灵"},
-    {"id": "yi", "name": "翳", "image": "翳.png", "elem": "相"},
-    {"id": "baicang", "name": "白藏", "image": "白藏.png", "elem": "咒"},
-    {"id": "nanali", "name": "娜娜莉", "image": "娜娜莉.png", "elem": "灵"},
-    {"id": "jiuyuanM", "name": "九原", "image": "九原.png", "elem": "灵"},
-    {"id": "xiaozhi", "name": "小吱", "image": "小吱.png", "elem": "光"},
+    {"id": "nanali", "name": "娜娜莉", "image": "娜娜莉.png", "elem": "灵", "char_key": "nanali"},
+    {"id": "xiaozhi", "name": "小吱", "image": "小吱.png", "elem": "光", "char_key": "xiaozhi"},
+    {"id": "baicang", "name": "白藏", "image": "白藏.png", "elem": "咒", "char_key": "baicang"},
+    {"id": "hasuoerM", "name": "哈索尔", "image": "哈索尔.png", "elem": "相", "char_key": "hasuoer"},
+    {"id": "haiyue", "name": "海月", "image": "海月.png", "elem": "魂", "char_key": "haiyue"},
+    {"id": "bohe", "name": "薄荷", "image": "薄荷.png", "elem": "灵", "char_key": "bohe"},
+    {"id": "yi", "name": "翳", "image": "翳.png", "elem": "相", "char_key": "yi"},
     # {"id": "anhunqu0", "name": "安魂曲（0觉）", "image": "安魂曲.png", "elem": "暗"},
     # {"id": "anhunqu1", "name": "安魂曲（1觉）", "image": "安魂曲.png", "elem": "暗"},
 ]
 
 TEAMMATES = [
-    {"id": "zhujue", "name": "主角", "image": "男主.png", "elem": "光"},
+    {"id": "zhujue", "name": "主角", "image": "男主.png", "elem": "光", "char_key": "zhujue"},
     # {"id": "xun", "name": "浔", "image": "浔.png", "elem": "光"},
-    {"id": "aidejia", "name": "埃德嘉", "image": "埃德嘉.png", "elem": "光"},
-    {"id": "jiuyuan", "name": "九原", "image": "九原.png", "elem": "灵"},
-    {"id": "boheT", "name": "薄荷", "image": "薄荷.png", "elem": "灵"},
-    {"id": "nanaliT", "name": "娜娜莉", "image": "娜娜莉.png", "elem": "灵"},
-    {"id": "zaowu", "name": "早雾", "image": "早雾.png", "elem": "咒"},
-    {"id": "adele", "name": "阿德勒", "image": "阿德勒.png", "elem": "咒"},
+    {"id": "aidejia", "name": "埃德嘉", "image": "埃德嘉.png", "elem": "光", "char_key": "aidejia"},
+    {"id": "jiuyuan", "name": "九原", "image": "九原.png", "elem": "灵", "char_key": "jiuyuan"},
+    {"id": "boheT", "name": "薄荷", "image": "薄荷.png", "elem": "灵", "char_key": "bohe"},
+    {"id": "nanaliT", "name": "娜娜莉", "image": "娜娜莉.png", "elem": "灵", "char_key": "nanali"},
+    {"id": "zaowu", "name": "早雾", "image": "早雾.png", "elem": "咒", "char_key": "zaowu"},
+    {"id": "adele", "name": "阿德勒", "image": "阿德勒.png", "elem": "咒", "char_key": "adele"},
     # {"id": "anhunquT1", "name": "安魂曲（1觉）", "image": "安魂曲.png", "elem": "暗"},
-    {"id": "dafutier0", "name": "达芙蒂尔（0觉）", "image": "达芙蒂尔.png", "elem": "暗"},
-    {"id": "dafutier1", "name": "达芙蒂尔（1觉）", "image": "达芙蒂尔.png", "elem": "暗"},
-    {"id": "fatiya", "name": "法帝娅", "image": "法帝娅.png", "elem": "魂"},
-    {"id": "haniya", "name": "哈尼娅", "image": "哈尼娅.png", "elem": "魂"},
-    {"id": "hasuoer", "name": "哈索尔", "image": "哈索尔.png", "elem": "相"},
+    {"id": "dafutier0", "name": "达芙蒂尔", "image": "达芙蒂尔.png", "elem": "暗", "char_key": "dafutier"},
+    {"id": "fatiya", "name": "法帝娅", "image": "法帝娅.png", "elem": "魂", "char_key": "fatiya"},
+    {"id": "haniya", "name": "哈尼娅", "image": "哈尼娅.png", "elem": "魂", "char_key": "haniya"},
+    {"id": "hasuoer", "name": "哈索尔", "image": "哈索尔.png", "elem": "相", "char_key": "hasuoer"},
+    {"id": "yiT", "name": "翳", "image": "翳.png", "elem": "相", "char_key": "yi"},
 ]
 
 @app.route("/")

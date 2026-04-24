@@ -8,284 +8,389 @@
     <style>
         :root {
             color-scheme: light;
-            --bg: #0f1224;
-            --card: rgba(255, 255, 255, 0.06);
-            --card-strong: rgba(255, 255, 255, 0.12);
-            --text: #f7f8ff;
-            --muted: rgba(247, 248, 255, 0.65);
-            --accent: #8ad1ff;
-            --accent-2: #f6c05b;
-            --danger: #ff8b8b;
+            --bg: #09111f;
+            --bg-2: #14253d;
+            --card: rgba(255, 255, 255, 0.08);
+            --card-strong: rgba(255, 255, 255, 0.14);
+            --panel: rgba(7, 14, 26, 0.72);
+            --text: #f6f7fb;
+            --muted: rgba(246, 247, 251, 0.68);
+            --accent: #83d8ff;
+            --accent-2: #ffd87f;
+            --outline: rgba(255, 255, 255, 0.1);
+            --danger: #ff9b9b;
+            --good: #9df2a6;
+            --shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
         }
         * {
             box-sizing: border-box;
         }
         body {
             margin: 0;
-            font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, -apple-system, sans-serif;
-            background: radial-gradient(circle at 20% 20%, #2a2f5b, #0f1224 55%);
-            color: var(--text);
             min-height: 100vh;
+            font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, -apple-system, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(77, 155, 255, 0.32), transparent 34%),
+                radial-gradient(circle at top right, rgba(57, 197, 174, 0.18), transparent 28%),
+                linear-gradient(180deg, var(--bg-2), var(--bg));
         }
         .page {
-            max-width: 1100px;
+            max-width: 1180px;
             margin: 0 auto;
-            padding: 40px 24px 80px;
+            padding: 36px 24px 72px;
             position: relative;
-        }
-        .hero {
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-between;
-            gap: 24px;
-            margin-bottom: 32px;
-        }
-        .hero h1 {
-            margin: 0;
-            font-size: 32px;
-            letter-spacing: 1px;
-        }
-        .hero p {
-            margin: 12px 0 0;
-            color: var(--muted);
-        }
-        .hero-note {
-            margin-top: 6px;
-            color: rgba(247, 248, 255, 0.55);
-            font-size: 12px;
-        }
-        .hero-note a {
-            color: #f6c05b;
-            text-decoration: none;
-            font-weight: 600;
-        }
-        .hero-note a:hover {
-            color: #ffd88a;
-        }
-        .icp {
-            margin-top: 28px;
-            text-align: center;
-            font-size: 12px;
-            color: rgba(247, 248, 255, 0.55);
-        }
-        .icp a {
-            color: rgba(247, 248, 255, 0.65);
-            text-decoration: none;
-        }
-        .icp a:hover {
-            color: #f7f8ff;
-        }
-        .glass {
-            background: var(--card);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            padding: 24px;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 10px 40px rgba(15, 18, 36, 0.45);
-        }
-        .section {
-            margin-top: 28px;
-        }
-        .section h2 {
-            margin: 0 0 16px;
-            font-size: 20px;
-            color: var(--accent);
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 16px;
-        }
-        .card {
-            position: relative;
-            padding: 16px;
-            border-radius: 18px;
-            background: var(--card);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            transition: all 0.2s ease;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
-        .card:hover {
-            transform: translateY(-4px);
-            background: var(--card-strong);
-        }
-        .card.selected {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 2px rgba(138, 209, 255, 0.35);
-        }
-        .avatar {
-            width: 86px;
-            height: 86px;
-            border-radius: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
-            object-fit: cover;
-        }
-        .name {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--accent);
-        }
-        .badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 4px 8px;
-            border-radius: 999px;
-            font-size: 12px;
-            color: var(--text);
-            background: rgba(0, 0, 0, 0.35);
-        }
-        .survive-badge {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            width: 26px;
-            height: 26px;
-            border-radius: 999px;
-            display: grid;
-            place-items: center;
-            background: rgba(90, 200, 120, 0.45);
-            border: 1px solid rgba(90, 200, 120, 0.7);
-        }
-        .survive-badge svg {
-            width: 16px;
-            height: 16px;
-            fill: rgba(255, 255, 255, 0.9);
-        }
-        .summary {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-top: 20px;
-            padding: 16px 20px;
-            background: rgba(15, 18, 36, 0.55);
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        .summary span {
-            color: var(--muted);
-        }
-        .cta {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            margin-top: 24px;
-        }
-        .btn {
-            border: none;
-            padding: 14px 28px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, var(--accent), #6ea8ff);
-            color: #0b0f24;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            transition: transform 0.15s ease, box-shadow 0.2s ease;
-            box-shadow: 0 10px 20px rgba(78, 135, 255, 0.35);
-        }
-        .btn:disabled {
-            background: #3d456b;
-            color: rgba(255, 255, 255, 0.6);
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-        .result {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 8px;
-            margin-top: 16px;
-        }
-        .result-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 20px;
-            font-weight: 700;
-        }
-        .result-row .value {
-            color: var(--accent-2);
-            font-size: 24px;
-        }
-        .unit-icon {
-            width: 40px;
-            height: auto;
-            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35));
-        }
-        .breakdown {
-            font-size: 12px;
-            color: rgba(247, 248, 255, 0.6);
-            line-height: 1.5;
-        }
-        .warning {
-            margin-top: 6px;
-            font-size: 12px;
-            color: #ff8b8b;
-        }
-        .hint {
-            margin-top: 10px;
-            color: var(--muted);
-            font-size: 14px;
         }
         .top-actions {
             position: absolute;
-            top: 40px;
+            top: 36px;
             right: 24px;
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            z-index: 60;
+            z-index: 5;
+        }
+        .cloud-float-btn,
+        .gh-link {
+            text-decoration: none;
+            color: #09111f;
+            background: linear-gradient(135deg, #8fdcff, #77b7ff);
+            box-shadow: 0 10px 22px rgba(56, 120, 255, 0.3);
         }
         .cloud-float-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 10px 14px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, var(--accent), #6ea8ff);
-            color: #0b0f24;
-            font-weight: 800;
+            border-radius: 14px;
+            padding: 10px 16px;
             font-size: 14px;
-            text-decoration: none;
-            box-shadow: 0 10px 20px rgba(78, 135, 255, 0.35);
-        }
-        .cloud-float-btn:hover {
-            filter: brightness(1.05);
+            font-weight: 800;
         }
         .gh-link {
-            width: 28px;
-            height: 28px;
+            width: 32px;
+            height: 32px;
             border-radius: 999px;
             display: grid;
             place-items: center;
-            background: rgba(0, 0, 0, 0.35);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            color: rgba(255, 255, 255, 0.85);
-            text-decoration: none;
-        }
-        .gh-link:hover {
-            background: rgba(0, 0, 0, 0.5);
-            color: #ffffff;
         }
         .gh-link svg {
             width: 16px;
             height: 16px;
             display: block;
         }
+        .hero {
+            margin-bottom: 24px;
+        }
+        .hero-main,
+        .section {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--outline);
+            border-radius: 24px;
+            backdrop-filter: blur(14px);
+            box-shadow: var(--shadow);
+        }
+        .hero-main {
+            padding: 28px;
+        }
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: rgba(131, 216, 255, 0.12);
+            color: var(--accent);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+        }
+        h1 {
+            margin: 16px 0 12px;
+            font-size: 34px;
+            line-height: 1.15;
+        }
+        .hero-copy {
+            margin: 0;
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.7;
+        }
+        .hero-notes {
+            margin-top: 18px;
+            display: grid;
+            gap: 8px;
+            font-size: 13px;
+            color: rgba(246, 247, 251, 0.74);
+        }
+        .hero-note-link {
+            color: var(--accent-2);
+            font-weight: 700;
+            text-decoration: none;
+        }
+        .section {
+            margin-top: 20px;
+            padding: 24px;
+        }
+        .section-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .section-header h2 {
+            margin: 0;
+            font-size: 22px;
+            color: var(--accent);
+        }
+        .section-header p {
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+        .control-box {
+            background: rgba(7, 14, 26, 0.42);
+            border: 1px solid var(--outline);
+            border-radius: 18px;
+            padding: 18px;
+        }
+        .control-box h3 {
+            margin: 0 0 12px;
+            font-size: 15px;
+            color: #f5f7ff;
+        }
+        .option-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .seg {
+            flex: 1 1 0;
+            min-width: 120px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            cursor: pointer;
+            transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+            text-align: left;
+        }
+        .seg:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.09);
+        }
+        .seg.selected {
+            border-color: rgba(131, 216, 255, 0.7);
+            background: rgba(131, 216, 255, 0.14);
+            box-shadow: inset 0 0 0 1px rgba(131, 216, 255, 0.18);
+        }
+        .seg-title {
+            display: block;
+            font-weight: 700;
+        }
+        .seg-sub {
+            display: block;
+            margin-top: 4px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+            gap: 14px;
+        }
+        .card {
+            position: relative;
+            padding: 16px 14px 14px;
+            border-radius: 20px;
+            background: var(--card);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            background: var(--card-strong);
+        }
+        .card.selected {
+            border-color: rgba(131, 216, 255, 0.75);
+            box-shadow: inset 0 0 0 1px rgba(131, 216, 255, 0.22), 0 10px 22px rgba(45, 95, 161, 0.24);
+        }
+        .card-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #08111f;
+            background: rgba(157, 242, 166, 0.9);
+        }
+        .card-badge.gather {
+            background: rgba(255, 216, 127, 0.92);
+        }
+        .elem-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 28px;
+            height: 28px;
+            border-radius: 999px;
+            display: grid;
+            place-items: center;
+            background: rgba(7, 14, 26, 0.72);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
+        }
+        .elem-badge img {
+            width: 18px;
+            height: 18px;
+            object-fit: contain;
+        }
+        .avatar {
+            width: 88px;
+            height: 88px;
+            border-radius: 22px;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.16);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.28);
+        }
+        .name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #f7f9ff;
+        }
+        .summary {
+            margin-top: 18px;
+            padding: 18px 20px;
+            background: var(--panel);
+            border: 1px solid var(--outline);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+        .summary-grid {
+            display: grid;
+            gap: 8px;
+            font-size: 14px;
+        }
+        .summary-grid span {
+            color: var(--muted);
+        }
+        .hint {
+            font-size: 14px;
+            color: var(--muted);
+        }
+        .cta {
+            margin-top: 18px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            border: none;
+            border-radius: 14px;
+            padding: 14px 26px;
+            background: linear-gradient(135deg, #8fdcff, #77b7ff);
+            color: #08111f;
+            font-weight: 800;
+            font-size: 15px;
+            cursor: pointer;
+            box-shadow: 0 10px 22px rgba(56, 120, 255, 0.3);
+        }
+        .btn:disabled {
+            cursor: not-allowed;
+            background: #47536a;
+            color: rgba(255, 255, 255, 0.62);
+            box-shadow: none;
+        }
+        .result {
+            margin-top: 18px;
+            padding: 20px;
+            border-radius: 20px;
+            background: rgba(7, 14, 26, 0.74);
+            border: 1px solid var(--outline);
+            display: grid;
+            gap: 14px;
+        }
+        .result-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .result-row .value {
+            color: var(--accent-2);
+            font-size: 28px;
+        }
+        .unit-icon {
+            width: 38px;
+            height: auto;
+            filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.28));
+        }
+        .breakdown {
+            display: grid;
+            gap: 8px;
+            color: rgba(246, 247, 251, 0.74);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .panel-lines {
+            display: grid;
+            gap: 8px;
+            margin-top: 2px;
+        }
+        .panel-line {
+            padding: 10px 12px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: #f4f7ff;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .warning {
+            color: var(--danger);
+            font-size: 13px;
+        }
+        .icp {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 12px;
+            color: rgba(246, 247, 251, 0.55);
+        }
+        .icp a {
+            color: rgba(246, 247, 251, 0.68);
+            text-decoration: none;
+        }
         @media (max-width: 760px) {
-            .hero {
-                flex-direction: column;
-                align-items: flex-start;
+            .page {
+                padding: 72px 16px 48px;
             }
-            .cta {
-                flex-direction: column;
+            .top-actions {
+                top: 18px;
+                right: 16px;
+            }
+            .controls {
+                grid-template-columns: 1fr;
+            }
+            .summary,
+            .cta,
+            .result-row {
                 align-items: flex-start;
             }
         }
@@ -301,67 +406,123 @@
             </a>
             <a class="cloud-float-btn" href="/cloud-team">详细计算</a>
         </div>
-        <div class="hero">
-            <div>
-                <h1>异环预配队（三测数据）</h1>
-                <p>挑选你的主C与三名队友，生成专属的队伍评分。</p>
-                <div class="hero-note">角色为80级，天赋10级；敌人为82级、20全抗、无红圈会攻击的站桩BOSS。</div>
-                <div class="hero-note">S级默认0觉，A级默认满觉，小吱2觉。</div>
-                <div class="hero-note">未考虑轴长不同步问题，会有一些出入；仅供娱乐，请以实战为主。</div>
-                <div class="hero-note">盾徽图标表示角色可以提供生存能力；</div>
-                <div class="hero-note">关注B站 <a href="https://space.bilibili.com/9412490" target="_blank" rel="noreferrer">静默之光</a>。</div>
-            </div>
-        </div>
 
         {% set survive_ids = ["aidejia", "adele", "fatiya"] %}
-        <div class="glass section">
-            <h2>选择主C</h2>
+        {% set gather_ids = ["zaowu", "jiuyuan", "jiuyuanM"] %}
+
+        <div class="hero">
+            <div class="hero-main">
+                <div class="eyebrow">PRETEAM 1.0</div>
+                <h1>异环预配队 1.0 版本</h1>
+                <p class="hero-copy">先选对单还是对群，再确定主C与三名队友。页面会按新的环合体系自动寻找更优配装，并输出 4 人的默认面板建议。</p>
+                <div class="hero-notes">
+                    <div>角色默认 80 级、天赋 10 级；敌人为 82 级、20 全抗、无红圈会攻击的站桩目标。</div>
+                    <div>S 级默认 0 觉，A级默认满觉，小吱默认 1 觉。</div>
+                    <div>“打满环合”会把主C环合机会提高到 1 次，但会拖轴导致伤害评分下降。</div>
+                    <div>关注 B 站 <a class="hero-note-link" href="https://space.bilibili.com/9412490" target="_blank" rel="noreferrer">静默之光</a>。</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <div>
+                    <h2>第一步：选择战斗目标</h2>
+                    <p>对单/对群会影响结果展示中的默认面板建议。</p>
+                </div>
+            </div>
+            <div class="controls">
+                <div class="control-box">
+                    <h3>战斗场景</h3>
+                    <div class="option-row" id="targetModeGroup">
+                        <button class="seg selected" type="button" data-group="targetMode" data-value="single">
+                            <span class="seg-title">对单</span>
+                            <span class="seg-sub">默认站桩单体目标</span>
+                        </button>
+                        <button class="seg" type="button" data-group="targetMode" data-value="aoe">
+                            <span class="seg-title">对群</span>
+                            <span class="seg-sub">用于群怪场景</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="control-box">
+                    <h3>环合节奏</h3>
+                    <div class="option-row" id="rotationModeGroup">
+                        <button class="seg selected" type="button" data-group="rotationMode" data-value="full_cd">
+                            <span class="seg-title">打满CD</span>
+                            <span class="seg-sub">主C按CD战场，两轮一环合</span>
+                        </button>
+                        <button class="seg" type="button" data-group="rotationMode" data-value="full_ring">
+                            <span class="seg-title">打满环合</span>
+                            <span class="seg-sub">主C打满环合下场，会拖轴</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <div>
+                    <h2>第二步：选择主C</h2>
+                </div>
+            </div>
             <div class="grid" id="mainGrid">
                 {% for item in main_candidates %}
-                <div class="card" data-id="{{ item.id }}" data-elem="{{ item.elem }}" data-group="main">
+                <div class="card" data-id="{{ item.id }}" data-char-key="{{ item.char_key }}" data-elem="{{ item.elem }}" data-group="main">
+                    {% if item.id in gather_ids %}
+                    <div class="card-badge gather">聚怪</div>
+                    {% elif item.id in survive_ids %}
+                    <div class="card-badge">生存</div>
+                    {% endif %}
+                    <div class="elem-badge" title="{{ item.elem }}">
+                        <img src="{{ url_for('static', filename='element/' ~ item.elem ~ '.png') }}" alt="{{ item.elem }}">
+                    </div>
                     <img src="{{ url_for('static', filename=item.image) }}" alt="{{ item.name }}" class="avatar">
                     <div class="name">{{ item.name }}</div>
-                    {% if item.id in survive_ids %}
-                    <div class="survive-badge" title="具备生存能力" aria-label="具备生存能力">
-                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M12 2l8 4v6c0 5.25-3.44 9.94-8 10.99C7.44 21.94 4 17.25 4 12V6l8-4zm0 2.27L6 7v5c0 4.27 2.73 8.18 6 8.99 3.27-.81 6-4.72 6-8.99V7l-6-2.73z"/>
-                        </svg>
-                    </div>
-                    {% endif %}
                 </div>
                 {% endfor %}
             </div>
         </div>
 
-        <div class="glass section">
-            <h2>选择三名队友</h2>
+        <div class="section">
+            <div class="section-header">
+                <div>
+                    <h2>第三步：选择三名队友</h2>
+                    <p>计算时会自动尝试直伤 / 环合 / 倾陷三种配装。</p>
+                </div>
+            </div>
             <div class="grid" id="teamGrid">
                 {% for item in teammates %}
-                <div class="card" data-id="{{ item.id }}" data-elem="{{ item.elem }}" data-group="team">
+                <div class="card" data-id="{{ item.id }}" data-char-key="{{ item.char_key }}" data-elem="{{ item.elem }}" data-group="team">
+                    {% if item.id in gather_ids %}
+                    <div class="card-badge gather">聚怪</div>
+                    {% elif item.id in survive_ids %}
+                    <div class="card-badge">生存</div>
+                    {% endif %}
+                    <div class="elem-badge" title="{{ item.elem }}">
+                        <img src="{{ url_for('static', filename='element/' ~ item.elem ~ '.png') }}" alt="{{ item.elem }}">
+                    </div>
                     <img src="{{ url_for('static', filename=item.image) }}" alt="{{ item.name }}" class="avatar">
                     <div class="name">{{ item.name }}</div>
-                    <div class="badge">队友</div>
-                    {% if item.id in survive_ids %}
-                    <div class="survive-badge" title="具备生存能力" aria-label="具备生存能力">
-                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M12 2l8 4v6c0 5.25-3.44 9.94-8 10.99C7.44 21.94 4 17.25 4 12V6l8-4zm0 2.27L6 7v5c0 4.27 2.73 8.18 6 8.99 3.27-.81 6-4.72 6-8.99V7l-6-2.73z"/>
-                        </svg>
-                    </div>
-                    {% endif %}
                 </div>
                 {% endfor %}
             </div>
+
             <div class="summary">
-                <div>
+                <div class="summary-grid">
+                    <div>模式：<span id="modePicked">对单 / 打满CD</span></div>
                     <div>主C：<span id="mainPicked">未选择</span></div>
                     <div>队友：<span id="teamPicked">0 / 3</span></div>
                 </div>
                 <div class="hint" id="hintText">请选择 1 名主C 与 3 名队友</div>
             </div>
+
             <div class="cta">
                 <button class="btn" id="calcBtn" disabled>开始计算</button>
-                <span class="hint">完成选择后自动解锁按钮</span>
+                <span class="hint">完成主C与队友选择后即可计算</span>
             </div>
+
             <div class="result">
                 <div class="result-row">
                     <span>最终评分</span>
@@ -370,9 +531,11 @@
                     <img src="{{ url_for('static', filename='单位.jpg') }}" alt="单位" class="unit-icon">
                 </div>
                 <div class="breakdown" id="breakdown"></div>
+                <div class="panel-lines" id="panelLines"></div>
                 <div class="warning" id="surviveWarning"></div>
             </div>
         </div>
+
         <div class="icp">
             <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">备案号：津ICP备2026003916号</a>
         </div>
@@ -381,205 +544,380 @@
     <script>
         const mainGrid = document.getElementById("mainGrid");
         const teamGrid = document.getElementById("teamGrid");
+        const modePicked = document.getElementById("modePicked");
         const mainPicked = document.getElementById("mainPicked");
         const teamPicked = document.getElementById("teamPicked");
         const hintText = document.getElementById("hintText");
         const calcBtn = document.getElementById("calcBtn");
         const resultValue = document.getElementById("resultValue");
         const breakdown = document.getElementById("breakdown");
+        const panelLines = document.getElementById("panelLines");
         const surviveWarning = document.getElementById("surviveWarning");
 
-        const nameMap = {};
-        const elemMap = {};
-        document.querySelectorAll(".card").forEach(card => {
+        const state = {
+            targetMode: "single",
+            rotationMode: "full_cd",
+            selectedMain: null,
+            selectedTeam: new Set(),
+        };
+
+        const cardMeta = {};
+        document.querySelectorAll(".card").forEach((card) => {
             const id = card.dataset.id;
-            const name = card.querySelector(".name")?.textContent || id;
-            if (id && !nameMap[id]) nameMap[id] = name;
-            const elem = card.dataset.elem;
-            if (id && elem && !elemMap[id]) elemMap[id] = elem;
+            cardMeta[id] = {
+                id,
+                name: card.querySelector(".name")?.textContent || id,
+                elem: card.dataset.elem || "",
+                charKey: card.dataset.charKey || id,
+            };
         });
 
-        let selectedMain = null;
-        const selectedTeam = new Set();
+        const surviveIds = new Set(["aidejia", "adele", "fatiya"]);
+        const baseDamageMap = {
+            bohe: 1.0,
+            boheT: 0.15,
+            yi: 0.8 / 1.2, // 除以自有攻击区
+            yiT: 0.1,
+            baicang: 1.5 / 1.2, // 除以自有攻击区
+            nanali: 1.3,
+            nanaliT: 0.3,
+            jiuyuanM: 1.0,
+            jiuyuan: 0.8,
+            xiaozhi: 1.6,
+            zhujue: 0.5,
+            aidejia: 0.0,
+            zaowu: 0.2,
+            adele: 0.2,
+            dafutier0: 0.4,
+            fatiya: 0.2,
+            haniya: 0.2,
+            hasuoer: 0.25 / 1.8, // 除以自有攻击区
+            hasuoerM: 1.8 / 1.8, // 除以自有攻击区
+            haiyue: 1.1 / 1.2,
+        };
+
+        const defaultBuilds = {
+            zhujue: {
+                weapon: "休息日/倾世之雨/引爆全场",
+                card: "失落光芒",
+                entry: "攻伤暴",
+            },
+            xiaozhi: {
+                weapon: "思考喵",
+                card: "失落光芒",
+                entry: "增伤暴伤",
+            },
+            aidejia: {
+                weapon: "扭曲之城的呼唤",
+                card: "缇娅的夜间酒馆",
+                entry: "生命",
+            },
+            nanali: {
+                weapon: "预备备/不屈之棉/鲸之歌/焰魂狂飙",
+                card: "森林萤火之心",
+                entry: "攻伤暴",
+            },
+            jiuyuan: {
+                weapon: "现实避难所",
+                card: "森林萤火之心",
+                entry: "攻伤暴",
+            },
+            bohe: {
+                weapon: "开始净空",
+                card: "森林萤火之心",
+                entry: "攻伤暴",
+            },
+            baicang: {
+                weapon: "茶花会",
+                card: "真红双生蝶",
+                entry: "攻伤暴",
+            },
+            zaowu: {
+                weapon: "好狗狗走四方",
+                card: "音速蓝刺猬",
+                entry: "攻伤暴",
+            },
+            adele: {
+                weapon: "勿忘伞",
+                card: "音速蓝刺猬",
+                entry: "防御",
+            },
+            dafutier: {
+                weapon: "漆黑青春妄想",
+                card: "迪亚波罗斯",
+                entry: "攻伤暴",
+            },
+            fatiya: {
+                weapon: "永恒圆舞曲",
+                card: "音速蓝刺猬",
+                entry: "生命",
+            },
+            haiyue: {
+                weapon: "预备备/银河暂留",
+                card: "恶魔之血诅咒",
+                entry: "攻伤暴",
+            },
+            haniya: {
+                weapon: "引爆全场",
+                card: "音速蓝刺猬",
+                entry: "默认不堆伤害",
+            },
+            hasuoer: {
+                weapon: "焰魂狂飙",
+                card: "街头拳王",
+                entry: "攻伤暴",
+            },
+            yi: {
+                weapon: "当心头顶",
+                card: "街头拳王",
+                entry: "攻伤暴",
+            },
+        };
+
+        function hasPair(allIds, elemA, elemB) {
+            const hasA = allIds.some((id) => cardMeta[id]?.elem === elemA);
+            const hasB = allIds.some((id) => cardMeta[id]?.elem === elemB);
+            return hasA && hasB;
+        }
+
+        function getCharacterKey(id) {
+            return cardMeta[id]?.charKey || id;
+        }
+
+        function getCharacterName(id) {
+            return cardMeta[id]?.name || id;
+        }
+
+        function getBaseDamage(id) {
+            return baseDamageMap[id] ?? 0;
+        }
+
+        function getPanelConfig(id, targetMode, buildType) {
+            const charKey = getCharacterKey(id);
+            const base = defaultBuilds[charKey] || { weapon: "未配置", card: "", entry: "默认配置" };
+            let card = base.card;
+            if (charKey === "jiuyuan" && targetMode === "single") {
+                card = "音速蓝刺猬";
+            }
+            let entry = base.entry;
+            if (buildType === "mastery") entry = "环合强度";
+            if (buildType === "qingxian") entry = "倾陷强度";
+            return {
+                weapon: base.weapon || "未配置",
+                card: card || "无",
+                entry: entry || "默认配置",
+            };
+        }
+
+        function updateModeButtons(groupName, value) {
+            document.querySelectorAll(`.seg[data-group="${groupName}"]`).forEach((btn) => {
+                btn.classList.toggle("selected", btn.dataset.value === value);
+            });
+        }
 
         function updateSummary() {
-            mainPicked.textContent = selectedMain ? selectedMain.name : "未选择";
-            teamPicked.textContent = `${selectedTeam.size} / 3`;
-            const ready = selectedMain && selectedTeam.size === 3;
+            const modeLabel = `${state.targetMode === "single" ? "对单" : "对群"} / ${state.rotationMode === "full_cd" ? "打满CD" : "打满环合"}`;
+            modePicked.textContent = modeLabel;
+            mainPicked.textContent = state.selectedMain ? state.selectedMain.name : "未选择";
+            teamPicked.textContent = `${state.selectedTeam.size} / 3`;
+            const ready = Boolean(state.selectedMain) && state.selectedTeam.size === 3;
             calcBtn.disabled = !ready;
             hintText.textContent = ready ? "可以开始计算" : "请选择 1 名主C 与 3 名队友";
         }
 
+        function clearResults() {
+            resultValue.textContent = "—";
+            breakdown.replaceChildren();
+            panelLines.replaceChildren();
+            surviveWarning.textContent = "";
+        }
+
         function selectMain(card) {
-            const cards = mainGrid.querySelectorAll(".card");
-            cards.forEach(item => item.classList.remove("selected"));
+            mainGrid.querySelectorAll(".card").forEach((item) => item.classList.remove("selected"));
             card.classList.add("selected");
-            selectedMain = {
+            state.selectedMain = {
                 id: card.dataset.id,
-                name: card.querySelector(".name").textContent
+                name: getCharacterName(card.dataset.id),
+                charKey: getCharacterKey(card.dataset.id),
             };
-            if ((selectedMain.id === "anhunqu0" || selectedMain.id === "anhunqu1") && selectedTeam.has("anhunquT1")) {
-                selectedTeam.delete("anhunquT1");
-                const teammateCard = teamGrid.querySelector('.card[data-id="anhunquT1"]');
-                if (teammateCard) teammateCard.classList.remove("selected");
+
+            for (const teamId of Array.from(state.selectedTeam)) {
+                if (getCharacterKey(teamId) === state.selectedMain.charKey) {
+                    state.selectedTeam.delete(teamId);
+                    const duplicateCard = teamGrid.querySelector(`.card[data-id="${teamId}"]`);
+                    if (duplicateCard) duplicateCard.classList.remove("selected");
+                }
             }
-            if (selectedMain.id === "bohe" && selectedTeam.has("boheT")) {
-                selectedTeam.delete("boheT");
-                const teammateCard = teamGrid.querySelector('.card[data-id="boheT"]');
-                if (teammateCard) teammateCard.classList.remove("selected");
-            }
-            if (selectedMain.id === "nanali" && selectedTeam.has("nanaliT")) {
-                selectedTeam.delete("nanaliT");
-                const teammateCard = teamGrid.querySelector('.card[data-id="nanaliT"]');
-                if (teammateCard) teammateCard.classList.remove("selected");
-            }
-            if (selectedMain.id === "jiuyuanM" && selectedTeam.has("jiuyuan")) {
-                selectedTeam.delete("jiuyuan");
-                const teammateCard = teamGrid.querySelector('.card[data-id="jiuyuan"]');
-                if (teammateCard) teammateCard.classList.remove("selected");
-            }
+
+            clearResults();
             updateSummary();
         }
 
         function toggleTeammate(card) {
             const id = card.dataset.id;
-            if (selectedTeam.has(id)) {
-                selectedTeam.delete(id);
+            const charKey = getCharacterKey(id);
+            if (state.selectedTeam.has(id)) {
+                state.selectedTeam.delete(id);
                 card.classList.remove("selected");
-            } else {
-                if (selectedTeam.size >= 3) {
-                    hintText.textContent = "队友已满 3 人";
-                    return;
-                }
-                if (id === "anhunquT1" && selectedMain && (selectedMain.id === "anhunqu0" || selectedMain.id === "anhunqu1")) {
-                    hintText.textContent = "安魂曲主C时不可选择安魂曲队友";
-                    return;
-                }
-                if (id === "boheT" && selectedMain && selectedMain.id === "bohe") {
-                    hintText.textContent = "薄荷主C时不可选择薄荷队友";
-                    return;
-                }
-                if (id === "nanaliT" && selectedMain && selectedMain.id === "nanali") {
-                    hintText.textContent = "娜娜莉主C时不可选择娜娜莉队友";
-                    return;
-                }
-                if (id === "jiuyuan" && selectedMain && selectedMain.id === "jiuyuanM") {
-                    hintText.textContent = "九原主C时不可选择九原队友";
-                    return;
-                }
-                if (id === "dafutier0" && selectedTeam.has("dafutier1")) {
-                    hintText.textContent = "达芙蒂尔0觉与1觉不可同时上场";
-                    return;
-                }
-                if (id === "dafutier1" && selectedTeam.has("dafutier0")) {
-                    hintText.textContent = "达芙蒂尔0觉与1觉不可同时上场";
-                    return;
-                }
-                selectedTeam.add(id);
-                card.classList.add("selected");
+                clearResults();
+                updateSummary();
+                return;
             }
+            if (state.selectedTeam.size >= 3) {
+                hintText.textContent = "队友已满 3 人";
+                return;
+            }
+            if (state.selectedMain && state.selectedMain.charKey === charKey) {
+                hintText.textContent = "同名角色不能同时作为主C和队友上场";
+                return;
+            }
+            if (Array.from(state.selectedTeam).some((teamId) => getCharacterKey(teamId) === charKey)) {
+                hintText.textContent = "同名角色不能重复上场";
+                return;
+            }
+            state.selectedTeam.add(id);
+            card.classList.add("selected");
+            clearResults();
             updateSummary();
         }
 
-        function has(id, allIds) {
+        function hasId(id, allIds) {
             return allIds.includes(id);
-        }
-
-        function basePersonalDamage(id) {
-            if (id === "bohe") return 1.0;
-            if (id === "boheT") return 0.15;
-            if (id === "nanaliT") return 0.3;
-            if (id === "yi") return 0.8 / 1.2;
-            if (id === "baicang") return 1.5 / 1.2;
-            if (id === "nanali") return 1.3;
-            if (id === "xiaozhi") return 1.6;
-            if (id === "anhunqu1") return 1.6;
-            if (id === "anhunqu0") return 1.6;
-            if (id === "jiuyuanM") return 1.0;
-            if (id === "jiuyuan") return 0.8;
-            if (id === "xun") return 0.3;
-            if (id === "anhunquT1") return 0.2;
-            if (id === "dafutier1") return 0.8 / 0.7;
-            if (id === "dafutier0") return 0.3 / 0.7;
-            if (id === "hasuoer") return 0.4 / 1.8;
-            if (id === "adele") return 0.2;
-            if (id === "zaowu") return 0.2;
-            if (id === "fatiya") return 0.2;
-            if (id === "aidejia") return 0.0;
-            if (id === "haniya") return 0.2;
-            if (id === "zhujue") return 0.5;
-            return 0.0;
         }
 
         function computeLayers(allIds) {
             let layers = 0;
-            if (has("zaowu", allIds)) layers += 1;
-            if (has("anhunqu0", allIds) || has("anhunqu1", allIds) || has("anhunquT1", allIds)) layers += 1;
-            if (has("zaowu", allIds) && has("adele", allIds)) layers += 1;
-            if (has("zaowu", allIds) && has("baicang", allIds)) layers += 0.5;
+            if (hasId("zaowu", allIds)) layers += 1;
+            if (hasId("zaowu", allIds) && hasId("adele", allIds)) layers += 1;
+            if (hasId("zaowu", allIds) && hasId("baicang", allIds)) layers += 0.5;
             return layers;
         }
 
         function computeAtkBonus(allIds, anxingCount, mainId) {
             let atk = 0;
-            if (has("zaowu", allIds)) atk += (mainId === "xiaozhi" ? 0.05 : 0.10);
-            if (has("haniya", allIds)) atk += (mainId === "xiaozhi" ? 0.20 : 0.25);
-            if (anxingCount > 0 && has("haniya", allIds)) atk += 0.08;
+            if (hasId("zaowu", allIds)) atk += (mainId === "xiaozhi" ? 0.05 : 0.10);
+            if (hasId("haniya", allIds)) atk += 0.25;
+            if (anxingCount > 0 && hasId("haniya", allIds)) atk += 0.08;
             return atk;
         }
 
-        function computeScenarioTotal(mainId, teamIds, scenario) {
-            const allIds = [mainId, ...teamIds];
-            const unique = new Set(allIds);
-            if (unique.size !== 4) return null;
+        function computeYingxuLayers(allIds) {
+            let layers = 1;
+            if (hasId("xiaozhi", allIds)) layers *= 2;
+            if (hasId("nanali", allIds) || hasId("nanaliT", allIds)) layers *= 2;
+            if (hasId("jiuyuan", allIds) || hasId("jiuyuanM", allIds)) layers *= 2;
+            if (hasId("hasuoer", allIds) || hasId("hasuoerM", allIds) || hasId("yi", allIds) || hasId("yiT", allIds)) layers *= 2;
+            return layers;
+        }
 
-            const creationCountTotal = scenario.creationCountBase + scenario.creationCountNoMasteryDouble;
-            const layers = computeLayers(allIds);
-            const atkBonus = computeAtkBonus(allIds, scenario.anxingCount, mainId);
-            const teamHasElem = (elem) => teamIds.some(id => elemMap[id] === elem);
-            const jinranActive = (mainId === "yi") && teamHasElem("魂");
-            const jinranCount = jinranActive ? (Number.isFinite(Number(scenario.jinranCount)) ? Number(scenario.jinranCount) : 1) : 0;
-            const yingxuActive = (mainId === "yi") && has("zhujue", allIds) && has("jiuyuan", allIds);
-            const hasDafutier0 = has("dafutier0", allIds);
-            const hasDafutier1 = has("dafutier1", allIds);
+        function hasGatherRole(allIds) {
+            return hasId("zaowu", allIds) || hasId("jiuyuan", allIds) || hasId("jiuyuanM", allIds);
+        }
 
-            function buildLoadouts() {
-                const out = [];
-                const ids = allIds.filter((id) => id);
-                const optionIds = [...ids];
-                const optionsById = Object.fromEntries(optionIds.map((id) => [id, ["direct", "mastery", "qingxian"]]));
+        function buildLoadouts(ids) {
+            const result = [];
+            const loadoutById = {};
 
-                function backtrack(idx, buildById) {
-                    if (idx >= optionIds.length) {
-                        const finalBuildById = { ...buildById };
-                        const masterySet = new Set();
-                        const qingxianSet = new Set();
-                        for (const id of ids) {
-                            const b = finalBuildById[id] || "direct";
-                            if (b === "mastery") masterySet.add(id);
-                            if (b === "qingxian") qingxianSet.add(id);
-                        }
-                        out.push({ buildById: finalBuildById, masterySet, qingxianSet });
-                        return;
+            function backtrack(index) {
+                if (index >= ids.length) {
+                    const buildById = { ...loadoutById };
+                    const masterySet = new Set();
+                    const qingxianSet = new Set();
+                    for (const id of ids) {
+                        const buildType = buildById[id] || "direct";
+                        if (buildType === "mastery") masterySet.add(id);
+                        if (buildType === "qingxian") qingxianSet.add(id);
                     }
-                    const id = optionIds[idx];
-                    for (const b of optionsById[id]) {
-                        buildById[id] = b;
-                        backtrack(idx + 1, buildById);
-                    }
-                    delete buildById[id];
+                    result.push({ buildById, masterySet, qingxianSet });
+                    return;
                 }
-
-                backtrack(0, {});
-                return out;
+                const id = ids[index];
+                for (const buildType of ["direct", "mastery", "qingxian"]) {
+                    loadoutById[id] = buildType;
+                    backtrack(index + 1);
+                }
             }
+
+            backtrack(0);
+            return result;
+        }
+
+        function getCreationCountField(providerId) {
+            return providerId === "zhujue" ? "creationCountBase" : "creationCountNoMasteryDouble";
+        }
+
+        function otherHasElem(allIds, providerId, elem) {
+            return allIds.some((id) => id !== providerId && cardMeta[id]?.elem === elem);
+        }
+
+        function buildProviderReactionOptions(providerId, count, allIds) {
+            if (!providerId || count <= 0) return [{ counts: {} }];
+            const elem = cardMeta[providerId]?.elem;
+            const charKey = getCharacterKey(providerId);
+            const options = [];
+            const seen = new Set();
+
+            function pushCounts(counts) {
+                const key = JSON.stringify(counts);
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    options.push({ counts });
+                }
+            }
+
+            if (elem === "光") {
+                if (otherHasElem(allIds, providerId, "灵")) pushCounts({ [getCreationCountField(providerId)]: count });
+                if (otherHasElem(allIds, providerId, "相")) pushCounts({ delayCount: count });
+            } else if (elem === "灵") {
+                if (otherHasElem(allIds, providerId, "光")) pushCounts({ [getCreationCountField(providerId)]: count });
+                if (otherHasElem(allIds, providerId, "咒")) pushCounts({ fuwenCount: count });
+            } else if (elem === "咒") {
+                if (otherHasElem(allIds, providerId, "灵")) pushCounts({ fuwenCount: count });
+                if (otherHasElem(allIds, providerId, "暗")) {
+                    pushCounts({ zhuoranCount: charKey === "baicang" ? Math.max(count, 1) : count });
+                }
+            } else if (elem === "魂") {
+                if (otherHasElem(allIds, providerId, "相")) pushCounts({ jinranCount: count });
+                if (otherHasElem(allIds, providerId, "暗")) pushCounts({ anxingCount: count });
+            } else if (elem === "相") {
+                if (otherHasElem(allIds, providerId, "光")) pushCounts({ delayCount: count });
+                if (otherHasElem(allIds, providerId, "魂")) pushCounts({ jinranCount: count });
+            } else if (elem === "暗") {
+                if (otherHasElem(allIds, providerId, "咒")) pushCounts({ zhuoranCount: count });
+                if (otherHasElem(allIds, providerId, "魂")) pushCounts({ anxingCount: count });
+            }
+
+            return options.length > 0 ? options : [{ counts: {} }];
+        }
+
+        function computeScenarioWithCounts(mainId, teamIds, targetMode, rotationMode, reactionCounts) {
+            const allIds = [mainId, ...teamIds];
+            const uniqueKeys = new Set(allIds.map((id) => getCharacterKey(id)));
+            if (uniqueKeys.size !== 4) return null;
+
+            const delayCount = reactionCounts.delayCount || 0;
+            const creationCountBase = reactionCounts.creationCountBase || 0;
+            const creationCountNoMasteryDouble = reactionCounts.creationCountNoMasteryDouble || 0;
+            const fuwenCount = reactionCounts.fuwenCount || 0;
+            const jinranCount = reactionCounts.jinranCount || 0;
+            const zhuoranCount = reactionCounts.zhuoranCount || 0;
+            const anxingCount = reactionCounts.anxingCount || 0;
+            const creationCount = creationCountBase + creationCountNoMasteryDouble;
+            const yingxuCount = Math.min(delayCount, creationCount);
+            const shixieCount = Math.min(zhuoranCount, anxingCount);
+            const layers = computeLayers(allIds);
+            const atkBonus = computeAtkBonus(allIds, anxingCount, mainId);
+            const hasDafutier = hasId("dafutier0", allIds);
+            const yingxuLayers = computeYingxuLayers(allIds);
+            const gatherPresent = hasGatherRole(allIds);
+            const bohePresent = hasId("bohe", allIds) || hasId("boheT", allIds);
 
             function reactionProviderMult(type, providerId, masterySet) {
                 if (!providerId) return 1;
-                const providerElem = elemMap[providerId];
+                const providerElem = cardMeta[providerId]?.elem;
                 let mult = 1;
                 for (const masteryId of masterySet) {
-                    const masteryElem = elemMap[masteryId];
+                    const masteryElem = cardMeta[masteryId]?.elem;
                     if (type === "creation") {
                         if (masteryElem === "灵" && (providerId === masteryId || providerElem === "光")) mult = Math.max(mult, 1.75);
                         if (masteryElem === "光" && (providerId === masteryId || providerElem === "灵")) mult = Math.max(mult, 1.9);
@@ -594,337 +932,287 @@
                 return mult;
             }
 
-            function computePersonal(zhuoranCount, loadout, xunBoost) {
+            let best = null;
+            const loadouts = buildLoadouts(allIds);
+
+            for (const loadout of loadouts) {
+                const masterySet = loadout.masterySet;
+                const qingxianSet = loadout.qingxianSet;
+                const hasLingMastery = Array.from(masterySet).some((id) => cardMeta[id]?.elem === "灵");
+                const hasZhouMastery = Array.from(masterySet).some((id) => cardMeta[id]?.elem === "咒");
+                const hasHunMastery = Array.from(masterySet).some((id) => cardMeta[id]?.elem === "魂");
+                const hasXiangMastery = Array.from(masterySet).some((id) => cardMeta[id]?.elem === "相");
+                const fuwenBaseMult = (hasLingMastery || hasZhouMastery) ? 1.30 : 1.20;
+                const jinranBaseMult = (hasHunMastery || hasXiangMastery) ? 1.30 : 1.20;
+                const fuwenMult = fuwenCount > 0 ? (1 + (fuwenBaseMult - 1) * fuwenCount) : 1;
+                const jinranMult = jinranCount > 0 ? (1 + (jinranBaseMult - 1) * jinranCount) : 1;
                 const zhuoranLayerBoost = zhuoranCount > 0 ? (1 + layers * 0.25) : 1;
                 const adeleLayerBoost = zhuoranCount > 0 ? (1 + layers * 0.08) : 1;
-                const anhunquLayerBoost = zhuoranCount > 0 ? (1 + layers * 0.07) : 1;
-                const masterySet = loadout.masterySet;
-                const hasLingMastery = Array.from(masterySet).some(id => elemMap[id] === "灵");
-                const hasZhouMastery = Array.from(masterySet).some(id => elemMap[id] === "咒");
-                const hasHunMastery = Array.from(masterySet).some(id => elemMap[id] === "魂");
-                const hasXiangMastery = Array.from(masterySet).some(id => elemMap[id] === "相");
-                const hasElem = (elem) => allIds.some(id => elemMap[id] === elem);
-                const fuwenBaseMult = (hasElem("灵") && hasElem("咒") && (hasLingMastery || hasZhouMastery)) ? 1.30 : 1.20;
-                const fuwenMult = scenario.fuwenCount > 0 ? (1 + (fuwenBaseMult - 1) * scenario.fuwenCount) : 1;
-                const jinranBaseMult = (hasElem("魂") && hasElem("相") && (hasHunMastery || hasXiangMastery)) ? 1.30 : 1.20;
-                const jinranMult = jinranCount > 0 ? (1 + (jinranBaseMult - 1) * jinranCount) : 1;
-                const qingxianSet = loadout.qingxianSet;
-                let personalSum = 0;
+                const creationMultNanali = (hasId("nanali", allIds) || hasId("nanaliT", allIds)) ? 2 : 1;
+                const creationMultJiuyuan = (hasId("jiuyuan", allIds) || hasId("jiuyuanM", allIds)) ? 2 : 1;
+                const creationMult = creationMultNanali * creationMultJiuyuan;
                 const characterDamage = {};
+                let personalSum = 0;
+
                 for (const id of allIds) {
-                    let dmg = basePersonalDamage(id);
+                    const elem = cardMeta[id]?.elem;
+                    const buildType = loadout.buildById[id] || "direct";
+                    const isMain = id === mainId;
+                    let dmg = getBaseDamage(id);
 
-                    const elem = elemMap[id];
-                    if (has("adele", allIds) && elem === "咒") dmg *= 1.05;
-
-                    const fuwenEligible = (elem === "灵" || elem === "咒");
-                    if (scenario.fuwenCount > 0 && fuwenEligible) dmg *= fuwenMult;
-
+                    if (hasId("adele", allIds) && elem === "咒") dmg *= 1.05;
+                    if (fuwenCount > 0 && (elem === "灵" || elem === "咒")) dmg *= fuwenMult;
                     if (jinranCount > 0 && (elem === "魂" || elem === "相")) dmg *= jinranMult;
                     if (mainId === "yi" && elem === "相") dmg *= 1.06;
-                    if (yingxuActive && id === "hasuoer") dmg *= 2.00;
+                    if (yingxuCount > 0 && isMain) {
+                        dmg *= 1 + yingxuCount * yingxuLayers * 0.05;
+                    }
+                    if (id === "haiyue" && anxingCount > 0) {
+                        dmg *= 1 + anxingCount * 0.05;
+                    }
+                    if (delayCount > 0 && hasId("hasuoer", allIds) && id !== "xiaozhi") {
+                        dmg *= 1.05;
+                    }
 
                     const ignoreAtk = (id === "xiaozhi" || id === "adele");
                     if (!ignoreAtk) {
-                        const selfAtkBonus = (id === "baicang" || id === "yi") ? 0.20 : (id === "hasuoer" ? 0.80 : 0);
+                        const selfAtkBonus = (id === "baicang" || id === "yi" || id === "yiT") ? 0.20 : ((id === "hasuoer" || id === "hasuoerM") ? 0.80 : 0);
                         dmg *= (1 + atkBonus + selfAtkBonus);
                     }
 
                     if (id === "adele") dmg *= adeleLayerBoost;
-                    if (id === "anhunqu0" || id === "anhunqu1" || id === "anhunquT1") dmg *= anhunquLayerBoost;
-
-                    if (loadout.buildById?.[id] && loadout.buildById[id] !== "direct") dmg *= 0.7;
-                    if (xunBoost?.type === "self" && id === "xun") dmg *= 2.0;
+                    if (targetMode === "aoe" && isMain) {
+                        const charKey = getCharacterKey(id);
+                        if (charKey === "haiyue" || charKey === "yi") {
+                            dmg /= 3;
+                        } else if (!gatherPresent) {
+                            dmg /= 3;
+                        }
+                    }
+                    if (!isMain && rotationMode === "full_ring") {
+                        dmg /= 1.3;
+                    }
+                    if (buildType !== "direct") dmg *= 0.7;
 
                     characterDamage[id] = dmg;
                     personalSum += dmg;
                 }
-                return { personalSum, characterDamage, zhuoranLayerBoost };
-            }
 
-            const creationMultNanali = (has("nanali", allIds) || has("nanaliT", allIds)) ? 2 : 1;
-            const creationMultJiuyuan = (has("jiuyuan", allIds) || has("jiuyuanM", allIds)) ? 2 : 1;
-            const creationMult = creationMultNanali * creationMultJiuyuan;
-
-            const baseCreationCountBase = scenario.creationCountBase;
-            const baseCreationCountNoMasteryDouble = scenario.creationCountNoMasteryDouble;
-            const baseZhuoranCount = scenario.zhuoranCount;
-            const baseAnxingCount = scenario.anxingCount;
-            const baseCreationTotal = baseCreationCountBase + baseCreationCountNoMasteryDouble;
-
-            function buildResult(c, loadout) {
-                const personal = computePersonal(c.z, loadout, c.xunBoost);
-                const masterySet = loadout.masterySet;
-
-                let zhujueBaseCount = allIds.includes("zhujue") ? Math.min(1, c.cBase) : 0;
-                let mainBaseCount = Math.max(0, c.cBase - zhujueBaseCount);
-                let mainCreationCount = mainBaseCount + c.cExtra;
-                if (c.xunBoost?.type === "creation") {
-                    if (c.xunBoost.providerId === "zhujue") zhujueBaseCount += 0.5;
-                    if (c.xunBoost.providerId === mainId) mainCreationCount += 0.5;
-                }
                 const creationProviderParts = [];
-                if (zhujueBaseCount > 0) creationProviderParts.push({ id: "zhujue", count: zhujueBaseCount });
-                if (mainCreationCount > 0) creationProviderParts.push({ id: mainId, count: mainCreationCount });
-
-                let creationFinal = 0;
-                for (const p of creationProviderParts) {
-                    const part = p.count * 0.15 * creationMult;
-                    creationFinal += part * reactionProviderMult("creation", p.id, masterySet);
+                if (creationCountBase > 0 && hasId("zhujue", allIds)) {
+                    creationProviderParts.push({ id: "zhujue", count: creationCountBase });
+                }
+                if (creationCountNoMasteryDouble > 0) {
+                    creationProviderParts.push({ id: mainId, count: creationCountNoMasteryDouble });
                 }
 
-                const zhuoranProviderId = (c.z > 0 && (mainId === "baicang" || mainId === "anhunqu0" || mainId === "anhunqu1")) ? mainId
-                    : (c.z > 0 && allIds.includes("anhunquT1") ? "anhunquT1" : mainId);
-                const cappedZhuoranTotal = Math.min(c.z, 1);
-                let zhuoranDamage = cappedZhuoranTotal * 0.2 * personal.zhuoranLayerBoost * reactionProviderMult("zhuoran", zhuoranProviderId, masterySet);
-
-                const anxingProviderId = (c.a > 0 && (mainId === "anhunqu0" || mainId === "anhunqu1")) ? mainId
-                    : (c.a > 0 && allIds.includes("anhunquT1") ? "anhunquT1" : mainId);
-                let anxingCount = c.a;
-                if (c.xunBoost?.type === "anxing" && c.xunBoost.providerId === anxingProviderId) {
-                    anxingCount += 0.5;
+                let creationDamage = 0;
+                for (const part of creationProviderParts) {
+                    creationDamage += part.count * 0.15 * creationMult * reactionProviderMult("creation", part.id, masterySet);
                 }
+
+                const zhuoranProviderId = mainId;
+                let zhuoranDamage = zhuoranCount * 0.2 * zhuoranLayerBoost * reactionProviderMult("zhuoran", zhuoranProviderId, masterySet);
+                const anxingProviderId = mainId;
                 let anxingDamage = anxingCount * 0.3 * reactionProviderMult("anxing", anxingProviderId, masterySet);
 
-                if (has("adele", allIds) && cappedZhuoranTotal > 0) {
-                    const adlerBoost = (mainId === "baicang" && (hasDafutier0 || hasDafutier1)) ? 1.06 : 1.03;
-                    creationFinal *= adlerBoost;
+                if (hasId("adele", allIds) && zhuoranCount > 0) {
+                    const adlerBoost = (mainId === "baicang" && hasDafutier) ? 1.06 : 1.03;
+                    creationDamage *= adlerBoost;
                     zhuoranDamage *= adlerBoost;
                     anxingDamage *= adlerBoost;
                 }
 
-                let shixieCount = (cappedZhuoranTotal > 0 && anxingCount > 0) ? (cappedZhuoranTotal * anxingCount) : 0;
-                if (has("baicang", allIds)) {
-                    shixieCount *= 2;
+                if (rotationMode === "full_ring") {
+                    creationDamage /= 1.3;
+                    zhuoranDamage /= 1.3;
+                    anxingDamage /= 1.3;
                 }
-                let baseQingxianDamage = 0.4;
-                baseQingxianDamage += loadout.qingxianSet.size * 0.075;
-                const dafutierId = allIds.includes("dafutier1") ? "dafutier1" : (allIds.includes("dafutier0") ? "dafutier0" : null);
-                if (dafutierId) {
-                    const dafutierIsQingxian = loadout.buildById?.[dafutierId] === "qingxian";
-                    const extra = dafutierIsQingxian ? 0.3 : 0.21;
-                    baseQingxianDamage += extra;
+                if (targetMode === "aoe" && !(bohePresent && gatherPresent)) {
+                    creationDamage /= 3;
                 }
-                const finalQingxianDamage = baseQingxianDamage * (1 + 0.3 * shixieCount);
 
-                let total = personal.personalSum + creationFinal + zhuoranDamage + anxingDamage + finalQingxianDamage;
+                const finalShixieCount = shixieCount;
+                let qingxianDamage = 0.3 + qingxianSet.size * 0.075;
+                if (hasDafutier) {
+                    qingxianDamage += loadout.buildById["dafutier0"] === "qingxian" ? 0.3 : 0.21;
+                }
+                qingxianDamage *= (1 + finalShixieCount * 0.3);
+
+                let total = personalSum + creationDamage + zhuoranDamage + anxingDamage + qingxianDamage;
                 if (mainId === "baicang") total *= 1.05;
-                const notes = [];
-                if (scenario.fuwenCount > 0) notes.push("覆纹");
-                if (jinranCount > 0) notes.push("浸染");
-                if (yingxuActive) notes.push("盈蓄");
-                if (shixieCount > 0) notes.push("失谐");
+                const reactions = [];
+                if (delayCount > 0) reactions.push(`延滞 ${delayCount.toFixed(1)}`);
+                if (creationCount > 0) reactions.push(`创生 ${creationDamage.toFixed(1)}`);
+                if (fuwenCount > 0) reactions.push(`触发${fuwenCount.toFixed(1)}次覆纹`);
+                if (jinranCount > 0) reactions.push(`触发${jinranCount.toFixed(1)}次浸染`);
+                if (zhuoranCount > 0) reactions.push(`浊燃 ${zhuoranDamage.toFixed(1)}`);
+                if (anxingCount > 0) reactions.push(`黯星 ${anxingDamage.toFixed(1)}`);
+                if (yingxuCount > 0) reactions.push(`触发${yingxuCount.toFixed(1)}次盈蓄`);
+                if (finalShixieCount > 0) reactions.push(`触发${finalShixieCount.toFixed(1)}次失谐`);
+                reactions.push(`倾陷 ${qingxianDamage.toFixed(1)}`);
 
-                return {
+                const candidate = {
                     total,
-                    personalSum: personal.personalSum,
-                    characterDamage: personal.characterDamage,
-                    creationFinal,
+                    characterDamage,
+                    creationDamage,
                     zhuoranDamage,
                     anxingDamage,
-                    qingxianDamage: finalQingxianDamage,
-                    notes,
-                    buildById: loadout.buildById
+                    qingxianDamage,
+                    reactions,
+                    buildById: loadout.buildById,
+                    allIds,
+                    targetMode,
+                    yingxuCount,
+                    yingxuLayers,
                 };
-            }
 
-            const hasXun = has("xun", allIds);
-            const baseCandidate = { cBase: baseCreationCountBase, cExtra: baseCreationCountNoMasteryDouble, z: baseZhuoranCount, a: baseAnxingCount, xunBoost: null };
-            const candidates = [baseCandidate];
-            if (hasXun) {
-                candidates.push({ ...baseCandidate, xunBoost: { type: "self" } });
-                if (baseCreationTotal > 0 && baseCreationTotal <= 3) {
-                    const zhujueCount0 = allIds.includes("zhujue") ? Math.min(1, baseCreationCountBase) : 0;
-                    const mainCount0 = Math.max(0, baseCreationCountBase - zhujueCount0) + baseCreationCountNoMasteryDouble;
-                    if (zhujueCount0 > 0) candidates.push({ ...baseCandidate, xunBoost: { type: "creation", providerId: "zhujue" } });
-                    if (mainCount0 > 0) candidates.push({ ...baseCandidate, xunBoost: { type: "creation", providerId: mainId } });
-                }
-                if (baseAnxingCount > 0) {
-                    const anxingProviderId0 = (baseAnxingCount > 0 && (mainId === "anhunqu0" || mainId === "anhunqu1")) ? mainId
-                        : (baseAnxingCount > 0 && allIds.includes("anhunquT1") ? "anhunquT1" : mainId);
-                    candidates.push({ ...baseCandidate, xunBoost: { type: "anxing", providerId: anxingProviderId0 } });
-                }
-            }
-
-            let best = null;
-            const loadouts = buildLoadouts();
-            for (const c of candidates) {
-                for (const loadout of loadouts) {
-                    const r = buildResult(c, loadout);
-                    if (!best || r.total > best.total) best = r;
+                if (!best || candidate.total > best.total) {
+                    best = candidate;
                 }
             }
 
             return best;
         }
 
-        function computeBestTotal(mainId, teamIds) {
+        function computeScenario(mainId, teamIds, targetMode, rotationMode) {
             const allIds = [mainId, ...teamIds];
-            const unique = new Set(allIds);
-            if (unique.size !== 4) return null;
-            if ((mainId === "anhunqu0" || mainId === "anhunqu1") && teamIds.includes("anhunquT1")) return null;
+            const uniqueKeys = new Set(allIds.map((id) => getCharacterKey(id)));
+            if (uniqueKeys.size !== 4) return null;
 
-            const baseScenario = {
-                creationCountBase: has("zhujue", allIds) ? 1 : 0,
-                creationCountNoMasteryDouble: 0,
-                zhuoranCount: 0,
-                anxingCount: 0,
-                fuwenCount: 0
-            };
+            const ringChance = rotationMode === "full_ring" ? 1 : 0.5;
+            const providerOptions = [];
+            if (hasId("zhujue", allIds)) {
+                providerOptions.push(buildProviderReactionOptions("zhujue", 1, allIds));
+            }
+            providerOptions.push(buildProviderReactionOptions(mainId, ringChance, allIds));
 
-            const teamHasElem = (elem) => teamIds.some(id => elemMap[id] === elem);
-            const hasElemExcluding = (elem, excludeId) => [mainId, ...teamIds].some(id => id !== excludeId && elemMap[id] === elem);
+            const scenarios = [];
+            const seen = new Set();
 
-            function applyAnhunquTeammateScenarioVariants(s) {
-                if (!teamIds.includes("anhunquT1")) return [s];
-                if (mainId === "anhunqu0" || mainId === "anhunqu1") return [];
-                const z = hasElemExcluding("咒", "anhunquT1") ? 1 : 0;
-                const a = hasElemExcluding("魂", "anhunquT1") ? 1 : 0;
-                const out = [s];
-                if (z > 0) out.push({ ...s, zhuoranCount: (s.zhuoranCount || 0) + 1 });
-                if (a > 0) out.push({ ...s, anxingCount: (s.anxingCount || 0) + 1 });
-                return out;
+            function walkProviders(index, mergedCounts) {
+                if (index >= providerOptions.length) {
+                    const normalized = {
+                        delayCount: mergedCounts.delayCount || 0,
+                        creationCountBase: mergedCounts.creationCountBase || 0,
+                        creationCountNoMasteryDouble: mergedCounts.creationCountNoMasteryDouble || 0,
+                        fuwenCount: mergedCounts.fuwenCount || 0,
+                        jinranCount: mergedCounts.jinranCount || 0,
+                        zhuoranCount: mergedCounts.zhuoranCount || 0,
+                        anxingCount: mergedCounts.anxingCount || 0,
+                    };
+                    const key = JSON.stringify(normalized);
+                    if (!seen.has(key)) {
+                        seen.add(key);
+                        scenarios.push(normalized);
+                    }
+                    return;
+                }
+
+                for (const option of providerOptions[index]) {
+                    walkProviders(index + 1, {
+                        delayCount: (mergedCounts.delayCount || 0) + (option.counts.delayCount || 0),
+                        creationCountBase: (mergedCounts.creationCountBase || 0) + (option.counts.creationCountBase || 0),
+                        creationCountNoMasteryDouble: (mergedCounts.creationCountNoMasteryDouble || 0) + (option.counts.creationCountNoMasteryDouble || 0),
+                        fuwenCount: (mergedCounts.fuwenCount || 0) + (option.counts.fuwenCount || 0),
+                        jinranCount: (mergedCounts.jinranCount || 0) + (option.counts.jinranCount || 0),
+                        zhuoranCount: (mergedCounts.zhuoranCount || 0) + (option.counts.zhuoranCount || 0),
+                        anxingCount: (mergedCounts.anxingCount || 0) + (option.counts.anxingCount || 0),
+                    });
+                }
             }
 
-            function pickBestFromScenarios(scenarios) {
-                const results = scenarios.map(s => computeScenarioTotal(mainId, teamIds, s)).filter(Boolean);
-                if (results.length === 0) return null;
-                return results.reduce((best, cur) => (cur.total > best.total ? cur : best), results[0]);
+            walkProviders(0, {});
+
+            let best = null;
+            for (const scenario of scenarios) {
+                const result = computeScenarioWithCounts(mainId, teamIds, targetMode, rotationMode, scenario);
+                if (!result) continue;
+                if (!best || result.total > best.total) best = result;
             }
-
-            if (mainId === "xiaozhi") {
-                const extra = teamHasElem("灵") ? 0.5 : 0;
-                const s = { ...baseScenario, creationCountNoMasteryDouble: extra };
-                return pickBestFromScenarios(applyAnhunquTeammateScenarioVariants(s));
-            }
-
-            if (mainId === "nanali" || mainId === "bohe") {
-                const sA = { ...baseScenario };
-                if (teamHasElem("光")) sA.creationCountBase += 0.5;
-                const tA = pickBestFromScenarios(applyAnhunquTeammateScenarioVariants(sA));
-
-                const sB = { ...baseScenario };
-                if (teamHasElem("咒")) sB.fuwenCount = 0.5;
-                const tB = pickBestFromScenarios(applyAnhunquTeammateScenarioVariants(sB));
-
-                if (!tA) return tB;
-                if (!tB) return tA;
-                return tA.total >= tB.total ? tA : tB;
-            }
-
-            if (mainId === "baicang") {
-                const sA = { ...baseScenario };
-                if (teamHasElem("暗")) sA.zhuoranCount = 0.5;
-                const tA = pickBestFromScenarios(applyAnhunquTeammateScenarioVariants(sA));
-
-                const sB = { ...baseScenario };
-                if (teamHasElem("灵")) sB.fuwenCount = 0.5;
-                const tB = pickBestFromScenarios(applyAnhunquTeammateScenarioVariants(sB));
-
-                if (!tA) return tB;
-                if (!tB) return tA;
-                return tA.total >= tB.total ? tA : tB;
-            }
-
-            if (mainId === "anhunqu1") {
-                const z = teamHasElem("咒") ? 1 : 0;
-                const a = teamHasElem("魂") ? 1 : 0;
-
-                const scenarios = [
-                    { ...baseScenario },
-                    { ...baseScenario, zhuoranCount: z },
-                    { ...baseScenario, anxingCount: a ? 1.5 : 0 },
-                    { ...baseScenario, zhuoranCount: z, anxingCount: a ? 0.5 : 0 },
-                    { ...baseScenario, zhuoranCount: z ? 0.5 : 0, anxingCount: a },
-                ];
-                const ts = scenarios.map((s) => computeScenarioTotal(mainId, teamIds, s)).filter(Boolean);
-                if (ts.length === 0) return null;
-                return ts.reduce((best, cur) => (cur.total > best.total ? cur : best), ts[0]);
-            }
-
-            if (mainId === "anhunqu0") {
-                const z = teamHasElem("咒") ? 0.5 : 0;
-                const a = teamHasElem("魂") ? 0.5 : 0;
-
-                const t0 = computeScenarioTotal(mainId, teamIds, { ...baseScenario });
-                const tZ = computeScenarioTotal(mainId, teamIds, { ...baseScenario, zhuoranCount: z });
-                const tA = computeScenarioTotal(mainId, teamIds, { ...baseScenario, anxingCount: a });
-
-                const ts = [t0, tZ, tA].filter(Boolean);
-                if (ts.length === 0) return null;
-                return ts.reduce((best, cur) => (cur.total > best.total ? cur : best), ts[0]);
-            }
-
-            return pickBestFromScenarios(applyAnhunquTeammateScenarioVariants(baseScenario));
+            return best;
         }
 
-        function calculateScore() {
-            if (!selectedMain || selectedTeam.size !== 3) {
-                return;
-            }
-            const teamArray = Array.from(selectedTeam);
-            const result = computeBestTotal(selectedMain.id, teamArray);
-            if (result === null) {
-                hintText.textContent = "选择无效：队伍中存在重复角色";
-                return;
-            }
+        function renderResult(result) {
+            const orderedIds = result.allIds;
             resultValue.textContent = result.total.toFixed(1);
-            const parts = [];
-            const orderedIds = [selectedMain.id, ...teamArray];
-            orderedIds.forEach(id => {
-                const name = nameMap[id] || id;
-                const value = result.characterDamage?.[id] ?? 0;
-                parts.push(`${name} ${value.toFixed(1)}`);
-            });
-            if (result.creationFinal > 0) parts.push(`创生 ${result.creationFinal.toFixed(1)}`);
-            if (result.zhuoranDamage > 0) parts.push(`浊燃 ${result.zhuoranDamage.toFixed(1)}`);
-            if (result.anxingDamage > 0) parts.push(`黯星 ${result.anxingDamage.toFixed(1)}`);
-            parts.push(`倾陷 ${result.qingxianDamage.toFixed(1)}`);
-            let extra = "";
-            if (result.notes && result.notes.length > 0) {
-                extra = `（触发${result.notes.join("、")}）`;
-            }
+
             breakdown.replaceChildren();
-            const line1 = document.createElement("div");
-            line1.textContent = parts.join(" · ") + extra;
-            breakdown.appendChild(line1);
+            const damageLine = document.createElement("div");
+            damageLine.textContent = orderedIds.map((id) => `${getCharacterName(id)} ${result.characterDamage[id].toFixed(1)}`).join(" · ");
+            breakdown.appendChild(damageLine);
 
-            const buildLabel = { direct: "直伤", mastery: "精通", qingxian: "倾陷" };
-            const buildParts = [];
+            const reactionLine = document.createElement("div");
+            reactionLine.textContent = `环合：${result.reactions.join(" · ")}`;
+            breakdown.appendChild(reactionLine);
+
+            panelLines.replaceChildren();
             for (const id of orderedIds) {
-                const b = result.buildById?.[id];
-                if (!b || b === "direct") continue;
-                const name = nameMap[id] || id;
-                buildParts.push(`${name} ${buildLabel[b] || b}`);
-            }
-            if (buildParts.length > 0) {
-                const line2 = document.createElement("div");
-                line2.textContent = `配装：${buildParts.join(" · ")}`;
-                breakdown.appendChild(line2);
+                const buildType = result.buildById[id] || "direct";
+                const panel = getPanelConfig(id, result.targetMode, buildType);
+                const line = document.createElement("div");
+                line.className = "panel-line";
+                line.textContent = `${getCharacterName(id)}，武器：${panel.weapon}，卡带：${panel.card}，词条：${panel.entry}`;
+                panelLines.appendChild(line);
             }
 
-            const surviveIds = new Set(["aidejia", "adele", "fatiya"]);
-            const pickedSurvive = orderedIds.filter(id => surviveIds.has(id));
+            const pickedSurvive = orderedIds.filter((id) => surviveIds.has(id));
             if (pickedSurvive.length === 0) {
-                surviveWarning.textContent = "请注意：该配队缺少生存能力";
+                if (orderedIds.includes("zhujue") && (result.yingxuCount || 0) > 0) {
+                    surviveWarning.textContent = "主角提供的生存能力较低，建议携带专职生存位";
+                } else {
+                    surviveWarning.textContent = "请注意：该配队缺少生存能力";
+                }
             } else {
                 surviveWarning.textContent = "";
             }
         }
 
-        mainGrid.addEventListener("click", event => {
+        function calculateScore() {
+            if (!state.selectedMain || state.selectedTeam.size !== 3) return;
+            const teamIds = Array.from(state.selectedTeam);
+            const result = computeScenario(state.selectedMain.id, teamIds, state.targetMode, state.rotationMode);
+            if (!result) {
+                hintText.textContent = "选择无效：队伍中存在重复角色";
+                return;
+            }
+            renderResult(result);
+            hintText.textContent = "计算完成";
+        }
+
+        document.querySelectorAll('.seg[data-group="targetMode"]').forEach((btn) => {
+            btn.addEventListener("click", () => {
+                state.targetMode = btn.dataset.value;
+                updateModeButtons("targetMode", state.targetMode);
+                clearResults();
+                updateSummary();
+            });
+        });
+
+        document.querySelectorAll('.seg[data-group="rotationMode"]').forEach((btn) => {
+            btn.addEventListener("click", () => {
+                state.rotationMode = btn.dataset.value;
+                updateModeButtons("rotationMode", state.rotationMode);
+                clearResults();
+                updateSummary();
+            });
+        });
+
+        mainGrid.addEventListener("click", (event) => {
             const card = event.target.closest(".card");
             if (!card) return;
             selectMain(card);
         });
 
-        teamGrid.addEventListener("click", event => {
+        teamGrid.addEventListener("click", (event) => {
             const card = event.target.closest(".card");
             if (!card) return;
             toggleTeammate(card);
         });
 
         calcBtn.addEventListener("click", calculateScore);
+
+        updateSummary();
     </script>
 </body>
 </html>
