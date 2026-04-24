@@ -1221,7 +1221,7 @@
                 qingxianDamage *= (1 + finalShixieCount * 0.3);
 
                 let total = personalSum + creationDamage + zhuoranDamage + anxingDamage + qingxianDamage;
-                if (mainId === "baicang") total *= 1.05;
+                if (mainId === "baicang") total *= (targetMode === "aoe" ? 1.10 : 1.05);
                 if (targetMode === "aoe" && hasId("zaowu", allIds)) total *= 1.05;
                 const reactions = [];
                 if (delayCount > 0) reactions.push(`延滞 ${delayCount.toFixed(1)}次`);
