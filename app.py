@@ -29,7 +29,7 @@ MAIN_CANDIDATES = [
 
 TEAMMATES = [
     {"id": "zhujue", "name": "主角", "image": "男主.png", "elem": "光", "char_key": "zhujue"},
-    # {"id": "xun", "name": "浔", "image": "浔.png", "elem": "光"},
+    {"id": "xun", "name": "浔", "image": "浔.png", "elem": "光", "char_key": "xun", "hidden_default": True},
     {"id": "aidejia", "name": "埃德嘉", "image": "埃德嘉.png", "elem": "光", "char_key": "aidejia"},
     {"id": "jiuyuan", "name": "九原", "image": "九原.png", "elem": "灵", "char_key": "jiuyuan"},
     {"id": "boheT", "name": "薄荷", "image": "薄荷.png", "elem": "灵", "char_key": "bohe"},
