@@ -1164,7 +1164,9 @@
                     if (id === "adele") dmg *= adeleLayerBoost;
                     if (targetMode === "aoe" && isMain) {
                         const charKey = getCharacterKey(id);
-                        if (charKey === "haiyue" || charKey === "yi") {
+                        if (charKey === "haiyue") {
+                            if (!gatherPresent) dmg *= 2 / 3;
+                        } else if (charKey === "yi") {
                             dmg /= 3;
                         } else if (!gatherPresent) {
                             dmg /= 3;
