@@ -804,12 +804,18 @@
             return baseDamageMap[id] ?? 0;
         }
 
-        function getPanelConfig(id, targetMode, buildType) {
+        function getPanelConfig(id, targetMode, rotationMode, buildType, mainCharKey, hasJiuyuan) {
             const charKey = getCharacterKey(id);
             const base = defaultBuilds[charKey] || { weapon: "未配置", card: "", entry: "默认配置" };
             let card = base.card;
-            if (charKey === "jiuyuan" && targetMode === "single") {
-                card = "音速蓝刺猬";
+            const jiuyuanSonic = targetMode === "single" && rotationMode === "full_cd";
+            const useAltSupportCards = (hasJiuyuan && jiuyuanSonic) || mainCharKey === "xiaozhi";
+            if (charKey === "jiuyuan") {
+                card = jiuyuanSonic ? "音速蓝刺猬" : "森林萤火之心";
+            } else if (charKey === "adele" && useAltSupportCards) {
+                card = "守卫王国";
+            } else if (charKey === "fatiya" && useAltSupportCards) {
+                card = "小小大冒险";
             }
             let entry = base.entry;
             if (buildType === "mastery") entry = "环合强度";
@@ -1122,8 +1128,9 @@
                 const hasXiangMastery = Array.from(masterySet).some((id) => cardMeta[id]?.elem === "相");
                 const fuwenBaseMult = (hasLingMastery || hasZhouMastery) ? 1.30 : 1.20;
                 const jinranBaseMult = (hasHunMastery || hasXiangMastery) ? 1.30 : 1.20;
-                const fuwenMult = fuwenCount > 0 ? (1 + (fuwenBaseMult - 1) * fuwenCount) : 1;
-                const jinranMult = jinranCount > 0 ? (1 + (jinranBaseMult - 1) * jinranCount) : 1;
+                const ringMultFactor = rotationMode === "full_ring" ? 0.8 : 1;
+                const fuwenMult = fuwenCount > 0 ? (1 + (fuwenBaseMult - 1) * ringMultFactor * fuwenCount) : 1;
+                const jinranMult = jinranCount > 0 ? (1 + (jinranBaseMult - 1) * ringMultFactor * jinranCount) : 1;
                 const zhuoranLayerBoost = zhuoranCount > 0 ? (1 + layers * 0.25) : 1;
                 const adeleLayerBoost = zhuoranCount > 0 ? (1 + layers * 0.08) : 1;
                 const creationMultNanali = (hasId("nanali", allIds) || hasId("nanaliT", allIds)) ? 2 : 1;
@@ -1131,6 +1138,7 @@
                 const creationMult = creationMultNanali * creationMultJiuyuan;
                 const characterDamage = {};
                 let personalSum = 0;
+                const jiuyuanSonic = targetMode === "single" && rotationMode === "full_cd";
 
                 for (const id of allIds) {
                     const elem = cardMeta[id]?.elem;
@@ -1147,6 +1155,9 @@
                     if (mainId === "yi" && elem === "相") dmg *= 1.06;
                     if (yingxuCount > 0 && isMain) {
                         dmg *= 1 + yingxuCount * yingxuLayers * 0.05;
+                    }
+                    if (getCharacterKey(id) === "jiuyuan" && jiuyuanSonic) {
+                        dmg *= 0.8;
                     }
                     if (id === "haiyue" && anxingCount > 0) {
                         dmg *= 1 + anxingCount * 0.05;
@@ -1247,6 +1258,7 @@
                     buildById: loadout.buildById,
                     allIds,
                     targetMode,
+                    rotationMode,
                     yingxuCount,
                     yingxuLayers,
                     xunBoostLabel: reactionCounts.xunBoostLabel || "",
@@ -1323,6 +1335,8 @@
         function renderResult(result) {
             const orderedIds = result.allIds;
             resultValue.textContent = result.total.toFixed(1);
+            const mainCharKey = getCharacterKey(orderedIds[0]);
+            const hasJiuyuan = orderedIds.some((id) => getCharacterKey(id) === "jiuyuan");
 
             breakdown.replaceChildren();
             const damageLine = document.createElement("div");
@@ -1336,7 +1350,7 @@
             panelLines.replaceChildren();
             for (const id of orderedIds) {
                 const buildType = result.buildById[id] || "direct";
-                const panel = getPanelConfig(id, result.targetMode, buildType);
+                const panel = getPanelConfig(id, result.targetMode, result.rotationMode, buildType, mainCharKey, hasJiuyuan);
                 const line = document.createElement("div");
                 line.className = "panel-line";
                 line.textContent = `${getCharacterName(id)}，武器：${panel.weapon}，卡带：${panel.card}，词条：${panel.entry}`;
