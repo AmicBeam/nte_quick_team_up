@@ -682,9 +682,9 @@
         const baseDamageMap = {
             bohe: 1.0,
             boheT: 0.15,
-            yi: 0.8 / 1.2, // 除以自有攻击区
-            yiT: 0.1,
-            baicang: 1.5 / 1.2, // 除以自有攻击区
+            yi: 0.8,
+            yiT: 0.12,
+            baicang: 1.5,
             nanali: 1.3,
             nanaliT: 0.3,
             jiuyuanM: 1.0,
@@ -697,10 +697,18 @@
             dafutier0: 0.4,
             fatiya: 0.2,
             haniya: 0.2,
-            hasuoer: 0.25 / 1.8, // 除以自有攻击区
-            hasuoerM: 1.8 / 1.8, // 除以自有攻击区
-            haiyue: 1.1 / 1.2,
+            hasuoer: 0.25,
+            hasuoerM: 1.8,
+            haiyue: 1.1,
             xun: 0.8,
+        };
+        const selfAtkMap = {
+            yi: 0.20,
+            yiT: 0.20,
+            baicang: 0.20,
+            hasuoer: 0.80,
+            hasuoerM: 0.80,
+            haiyue: 0.20,
         };
 
         const defaultBuilds = {
@@ -804,12 +812,16 @@
             return baseDamageMap[id] ?? 0;
         }
 
-        function getPanelConfig(id, targetMode, rotationMode, buildType, mainCharKey, hasJiuyuan) {
+        function getPanelConfig(id, targetMode, rotationMode, buildType, mainCharKey, hasJiuyuan, isMain) {
             const charKey = getCharacterKey(id);
             const base = defaultBuilds[charKey] || { weapon: "未配置", card: "", entry: "默认配置" };
+            let weapon = base.weapon;
             let card = base.card;
             const jiuyuanSonic = targetMode === "single" && rotationMode === "full_cd";
             const useAltSupportCards = (hasJiuyuan && jiuyuanSonic) || mainCharKey === "xiaozhi";
+            if (charKey === "nanali" && !isMain) {
+                weapon = "不屈之棉/鲸之歌/焰魂狂飙";
+            }
             if (charKey === "jiuyuan") {
                 card = jiuyuanSonic ? "音速蓝刺猬" : "森林萤火之心";
             } else if (charKey === "adele" && useAltSupportCards) {
@@ -821,7 +833,7 @@
             if (buildType === "mastery") entry = "环合强度";
             if (buildType === "qingxian") entry = "倾陷强度";
             return {
-                weapon: base.weapon || "未配置",
+                weapon: weapon || "未配置",
                 card: card || "无",
                 entry: entry || "默认配置",
             };
@@ -1168,7 +1180,8 @@
 
                     const ignoreAtk = (id === "xiaozhi" || id === "adele");
                     if (!ignoreAtk) {
-                        const selfAtkBonus = (id === "baicang" || id === "yi" || id === "yiT") ? 0.20 : ((id === "hasuoer" || id === "hasuoerM") ? 0.80 : 0);
+                        const selfAtkBonus = selfAtkMap[id] || 0;
+                        if (selfAtkBonus > 0) dmg /= (1 + selfAtkBonus);
                         dmg *= (1 + atkBonus + selfAtkBonus);
                     }
 
@@ -1211,7 +1224,7 @@
                 let anxingDamage = anxingCount * 0.3 * reactionProviderMult("anxing", anxingProviderId, masterySet);
 
                 if (hasId("adele", allIds) && zhuoranCount > 0) {
-                    const adlerBoost = (mainId === "baicang" && hasDafutier) ? 1.06 : 1.03;
+                    const adlerBoost = 1.03;
                     creationDamage *= adlerBoost;
                     zhuoranDamage *= adlerBoost;
                     anxingDamage *= adlerBoost;
@@ -1227,9 +1240,9 @@
                 }
 
                 const finalShixieCount = shixieCount;
-                let qingxianDamage = 0.3 + qingxianSet.size * 0.075;
+                let qingxianDamage = 0.33 + qingxianSet.size * 0.07;
                 if (hasDafutier) {
-                    qingxianDamage += loadout.buildById["dafutier0"] === "qingxian" ? 0.3 : 0.21;
+                    qingxianDamage += loadout.buildById["dafutier0"] === "qingxian" ? 0.34 : 0.21;
                 }
                 qingxianDamage *= (1 + finalShixieCount * 0.3);
 
@@ -1350,7 +1363,7 @@
             panelLines.replaceChildren();
             for (const id of orderedIds) {
                 const buildType = result.buildById[id] || "direct";
-                const panel = getPanelConfig(id, result.targetMode, result.rotationMode, buildType, mainCharKey, hasJiuyuan);
+                const panel = getPanelConfig(id, result.targetMode, result.rotationMode, buildType, mainCharKey, hasJiuyuan, id === orderedIds[0]);
                 const line = document.createElement("div");
                 line.className = "panel-line";
                 line.textContent = `${getCharacterName(id)}，武器：${panel.weapon}，卡带：${panel.card}，词条：${panel.entry}`;
