@@ -1134,12 +1134,8 @@
             for (const loadout of loadouts) {
                 const masterySet = loadout.masterySet;
                 const qingxianSet = loadout.qingxianSet;
-                const hasLingMastery = Array.from(masterySet).some((id) => cardMeta[id]?.elem === "灵");
-                const hasZhouMastery = Array.from(masterySet).some((id) => cardMeta[id]?.elem === "咒");
-                const hasHunMastery = Array.from(masterySet).some((id) => cardMeta[id]?.elem === "魂");
-                const hasXiangMastery = Array.from(masterySet).some((id) => cardMeta[id]?.elem === "相");
-                const fuwenBaseMult = (hasLingMastery || hasZhouMastery) ? 1.30 : 1.20;
-                const jinranBaseMult = (hasHunMastery || hasXiangMastery) ? 1.30 : 1.20;
+                const fuwenBaseMult = 1.20;
+                const jinranBaseMult = 1.20;
                 const ringMultFactor = rotationMode === "full_ring" ? 0.8 : 1;
                 const fuwenMult = fuwenCount > 0 ? (1 + (fuwenBaseMult - 1) * ringMultFactor * fuwenCount) : 1;
                 const jinranMult = jinranCount > 0 ? (1 + (jinranBaseMult - 1) * ringMultFactor * jinranCount) : 1;
